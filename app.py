@@ -12,6 +12,14 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
+# Настройка страницы (должна быть первой командой Streamlit)
+st.set_page_config(
+    page_title="Система бронирования встреч",
+    page_icon="📅",
+    layout="centered",
+    initial_sidebar_state="collapsed",
+)
+
 # Создаем директорию для логов, если её нет
 logs_dir = os.path.join(os.getcwd(), "logs")
 if not os.path.exists(logs_dir):
@@ -64,14 +72,6 @@ def log_email_operation(message, level="info"):
 
 # Загрузка переменных окружения
 load_dotenv()
-
-# Настройка страницы
-st.set_page_config(
-    page_title="Система бронирования встреч",
-    page_icon="📅",
-    layout="centered",
-    initial_sidebar_state="collapsed",
-)
 
 # Добавляем CSS стили
 st.markdown(
