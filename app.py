@@ -360,14 +360,14 @@ st.markdown(
         transition: all 0.3s ease;
         text-align: center;
         color: white;
-        background: linear-gradient(145deg, #32a852, #2d9649);
+        background: linear-gradient(145deg, #7a936c, #6a8a5b);
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .slot-button:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        background: linear-gradient(145deg, #37bc5c, #32a852) !important;
+        background: linear-gradient(145deg, #8a9f7c, #7a936c) !important;
     }
 
     .slot-button.unavailable {
@@ -403,7 +403,7 @@ st.markdown(
     }
 
     .status-dot.available {
-        background: linear-gradient(145deg, #32a852, #2d9649);
+        background: linear-gradient(145deg, #7a936c, #6a8a5b);
     }
 
     .status-dot.unavailable {
@@ -412,13 +412,13 @@ st.markdown(
 
     /* Переопределение стилей Streamlit */
     button[kind="secondary"] {
-        background: linear-gradient(145deg, #32a852, #2d9649) !important;
+        background: linear-gradient(145deg, #7a936c, #6a8a5b) !important;
         border: none !important;
         color: white !important;
     }
 
     button[kind="secondary"]:hover {
-        background: linear-gradient(145deg, #37bc5c, #32a852) !important;
+        background: linear-gradient(145deg, #8a9f7c, #7a936c) !important;
         border: none !important;
         color: white !important;
     }
