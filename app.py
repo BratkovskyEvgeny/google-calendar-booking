@@ -744,11 +744,13 @@ st.markdown(
         }
         
         .header-container h1 {
-            font-size: 1.6rem;
-            letter-spacing: 0.5px;
+            font-size: 1.4rem;
+            letter-spacing: 0px;
             margin-bottom: 0.5rem;
             line-height: 1.4;
-            padding: 0 0.5rem;
+            padding: 0 0.3rem;
+            word-break: break-word;
+            hyphens: auto;
         }
 
         .mobile-break {
@@ -779,14 +781,16 @@ st.markdown(
         }
         
         .header-container h1 {
-            font-size: 1.4rem;
-            letter-spacing: 0.3px;
-            padding: 0 0.3rem;
+            font-size: 1.2rem;
+            letter-spacing: 0px;
+            padding: 0 0.2rem;
+            word-break: break-word;
+            hyphens: auto;
         }
         
         .subtitle {
             font-size: 0.9rem;
-            letter-spacing: 1.2px;
+            letter-spacing: 1px;
             padding: 0 0.3rem;
         }
         
@@ -795,6 +799,22 @@ st.markdown(
             line-height: 1.4;
             margin: 1rem 0 0;
             padding: 0 0.5rem;
+        }
+    }
+
+    /* Для очень маленьких экранов */
+    @media screen and (max-width: 360px) {
+        .header-container h1 {
+            font-size: 1.1rem;
+            letter-spacing: 0px;
+            padding: 0 0.2rem;
+            word-break: break-word;
+            hyphens: auto;
+        }
+        
+        .subtitle {
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
         }
     }
 
