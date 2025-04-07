@@ -25,29 +25,25 @@ st.set_page_config(
 st.markdown(
     """
 <style>
-    .profile-container {
+    .header-container {
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 1rem auto 2rem;
+        margin: 2rem auto;
         flex-direction: column;
         max-width: 800px;
-    }
-    .profile-photo {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        object-fit: cover;
-        margin-bottom: 1rem;
-        border: 2px solid #4dabf7;
+        background-color: #2b2b2b;
+        padding: 2rem;
+        border-radius: 8px;
+        border: 1px solid #3c3f41;
     }
     .stButton button {
         width: 100%;
         border-radius: 4px;
         background-color: #2b2b2b;
         border: 1px solid #3c3f41;
-        padding: 6px 2px;
-        font-size: 0.85rem;
+        padding: 8px 4px;
+        font-size: 0.9rem;
         transition: all 0.2s ease;
         margin: 1px 0;
         color: #a9b7c6;
@@ -56,55 +52,58 @@ st.markdown(
         background-color: #4dabf7;
         color: #2b2b2b;
         border-color: #4dabf7;
+        transform: translateY(-1px);
     }
     .date-header {
         background-color: #323232;
         color: #a9b7c6;
-        padding: 6px 10px;
+        padding: 10px 15px;
         border-radius: 4px;
-        margin: 8px 0 4px;
-        font-size: 0.85rem;
+        margin: 12px 0 8px;
+        font-size: 0.9rem;
         border: 1px solid #3c3f41;
     }
     .booking-form {
         background-color: #2b2b2b;
-        padding: 20px;
-        border-radius: 6px;
-        margin-top: 20px;
+        padding: 25px;
+        border-radius: 8px;
+        margin-top: 30px;
         border: 1px solid #3c3f41;
     }
     h1 {
         color: #4dabf7;
         text-align: center;
-        margin: 0.5rem 0;
-        font-size: 1.5rem;
+        margin: 0;
+        font-size: 2rem;
         font-weight: 600;
+        letter-spacing: 1px;
     }
     .subtitle {
         color: #a9b7c6;
         text-align: center;
-        margin-bottom: 1rem;
-        font-size: 1rem;
+        margin: 0.5rem 0 0;
+        font-size: 1.1rem;
         font-weight: 400;
+        opacity: 0.9;
     }
     .calendar-container {
         background-color: #2b2b2b;
-        padding: 12px;
-        border-radius: 6px;
+        padding: 20px;
+        border-radius: 8px;
         border: 1px solid #3c3f41;
         margin: 0 -1rem;
     }
     .date-header h3 {
         margin: 0;
-        font-size: 0.9rem;
-        font-weight: 400;
+        font-size: 1rem;
+        font-weight: 500;
         color: #a9b7c6;
     }
     .slot-grid {
         display: grid;
         grid-template-columns: repeat(6, 1fr);
-        gap: 4px;
-        padding: 4px 0;
+        gap: 6px;
+        padding: 6px 0;
     }
     .stApp {
         background-color: #1e1f22;
@@ -131,17 +130,34 @@ st.markdown(
         background-color: #4dabf7;
         color: #2b2b2b;
         font-weight: 500;
-        padding: 8px 16px;
+        padding: 10px 20px;
+        width: 100%;
+        margin-top: 10px;
+        font-size: 1rem;
     }
     .stForm button:hover {
         background-color: #339af0;
         border-color: #339af0;
+    }
+    .form-description {
+        color: #a9b7c6;
+        font-size: 0.9rem;
+        margin: 10px 0;
+        opacity: 0.8;
+    }
+    .form-header {
+        color: #4dabf7;
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        font-weight: 500;
     }
     /* Darcula theme additional styles */
     .stTextInput input {
         background-color: #2b2b2b !important;
         color: #a9b7c6 !important;
         border: 1px solid #3c3f41 !important;
+        padding: 10px !important;
+        font-size: 1rem !important;
     }
     .stTextInput input:focus {
         border-color: #4dabf7 !important;
@@ -335,11 +351,10 @@ def create_calendar_event(slot_time, booker_email):
 
 
 def main():
-    # Добавляем профиль и заголовок
+    # Добавляем заголовок
     st.markdown(
         """
-        <div class="profile-container">
-            <img src="/app/static/images/profile.jpg" class="profile-photo" alt="Евгений Братковский">
+        <div class="header-container">
             <h1>СВОБОДНЫЕ СЛОТЫ</h1>
             <div class="subtitle">БРАТКОВСКОГО ЕВГЕНИЯ</div>
         </div>
@@ -405,10 +420,25 @@ def main():
     # Форма бронирования
     if "show_booking_form" in st.session_state and st.session_state.show_booking_form:
         st.markdown('<div class="booking-form">', unsafe_allow_html=True)
-        st.subheader("📝 Форма бронирования")
+
+        # Добавляем описание формы
+        st.markdown(
+            """
+            <div class="form-header">📝 Бронирование встречи</div>
+            <div class="form-description">
+            Для бронирования встречи, пожалуйста, введите ваш email адрес. 
+            На него будет отправлено подтверждение бронирования и детали встречи.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
         with st.form("booking_form"):
-            booker_email = st.text_input("📧 Ваш email:")
-            submitted = st.form_submit_button("✅ Подтвердить бронирование")
+            booker_email = st.text_input(
+                "📧 Ваш email адрес:",
+                help="Введите email, на который вы хотите получить подтверждение бронирования",
+            )
+            submitted = st.form_submit_button("✅ Забронировать встречу")
 
             if submitted and booker_email:
                 if create_calendar_event(st.session_state.selected_slot, booker_email):
@@ -417,7 +447,7 @@ def main():
                         booker_email,
                     ):
                         st.success(
-                            "🎉 Встреча успешно забронирована! Проверьте вашу почту."
+                            "🎉 Встреча успешно забронирована! Проверьте вашу почту для получения деталей."
                         )
                     st.session_state.show_booking_form = False
                     st.rerun()
