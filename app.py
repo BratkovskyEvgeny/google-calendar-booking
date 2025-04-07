@@ -261,9 +261,19 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 CALENDAR_ID = st.secrets["calendar_id"]
 GMAIL_SENDER = st.secrets["gmail_sender"]
-GMAIL_APP_PASSWORD = st.secrets["gmail_app_password"]
+# Форматируем пароль приложения, добавляя пробелы каждые 4 символа
+GMAIL_APP_PASSWORD = " ".join(
+    [
+        st.secrets["gmail_app_password"][i : i + 4]
+        for i in range(0, len(st.secrets["gmail_app_password"]), 4)
+    ]
+)
 CLIENT_ID = st.secrets["google_client_id"]
 CLIENT_SECRET = st.secrets["google_client_secret"]
+
+# Добавляем отладочную информацию
+st.write(f"Email отправителя: {GMAIL_SENDER}")
+st.write(f"Длина пароля приложения: {len(GMAIL_APP_PASSWORD)}")
 
 
 def get_google_calendar_service():
