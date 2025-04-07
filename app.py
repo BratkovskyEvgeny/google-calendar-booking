@@ -15,7 +15,10 @@ load_dotenv()
 
 # Настройка страницы
 st.set_page_config(
-    page_title="Система бронирования встреч", page_icon="📅", layout="centered"
+    page_title="Система бронирования встреч",
+    page_icon="📅",
+    layout="centered",
+    initial_sidebar_state="collapsed",
 )
 
 # Добавляем CSS стили
@@ -26,87 +29,125 @@ st.markdown(
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 2rem auto 3rem;
+        margin: 1rem auto 2rem;
         flex-direction: column;
         max-width: 800px;
-        padding: 20px;
     }
     .profile-photo {
-        width: 150px;
-        height: 150px;
+        width: 120px;
+        height: 120px;
         border-radius: 50%;
         object-fit: cover;
-        margin-bottom: 1.5rem;
-        border: 3px solid #1f61eb;
-        box-shadow: 0 4px 12px rgba(31, 97, 235, 0.2);
+        margin-bottom: 1rem;
+        border: 2px solid #1e88e5;
     }
     .stButton button {
         width: 100%;
         border-radius: 4px;
-        background-color: #f8f9fa;
-        border: 1px solid #e9ecef;
-        padding: 8px 4px;
-        font-size: 0.9rem;
+        background-color: white;
+        border: 1px solid #e0e0e0;
+        padding: 6px 2px;
+        font-size: 0.85rem;
         transition: all 0.2s ease;
-        margin: 2px 0;
+        margin: 1px 0;
+        color: #424242;
     }
     .stButton button:hover {
-        background-color: #1f61eb;
+        background-color: #1e88e5;
         color: white;
-        border-color: #1f61eb;
+        border-color: #1e88e5;
     }
     .date-header {
-        background-color: #1f61eb;
+        background-color: #1e88e5;
         color: white;
-        padding: 8px 12px;
+        padding: 6px 10px;
         border-radius: 4px;
-        margin: 10px 0 5px;
-        font-size: 0.9rem;
+        margin: 8px 0 4px;
+        font-size: 0.85rem;
     }
     .booking-form {
-        background-color: #f8f9fa;
+        background-color: white;
         padding: 20px;
-        border-radius: 8px;
+        border-radius: 6px;
         margin-top: 20px;
-        border: 1px solid #e9ecef;
+        border: 1px solid #e0e0e0;
     }
     h1 {
-        color: #1f61eb;
+        color: #1e88e5;
         text-align: center;
         margin: 0.5rem 0;
-        font-size: 1.8rem;
+        font-size: 1.5rem;
         font-weight: 600;
-        letter-spacing: 1px;
     }
     .subtitle {
-        color: #6c757d;
+        color: #757575;
         text-align: center;
         margin-bottom: 1rem;
-        font-size: 1.2rem;
-        font-weight: 500;
+        font-size: 1rem;
+        font-weight: 400;
     }
     .calendar-container {
         background-color: white;
-        padding: 15px;
-        border-radius: 8px;
-        border: 1px solid #e9ecef;
-        margin-bottom: 20px;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #e0e0e0;
+        margin: 0 -1rem;
     }
     .date-header h3 {
         margin: 0;
-        font-size: 1rem;
-        font-weight: 500;
+        font-size: 0.9rem;
+        font-weight: 400;
     }
     .slot-grid {
         display: grid;
         grid-template-columns: repeat(6, 1fr);
-        gap: 5px;
-        padding: 5px 0;
+        gap: 4px;
+        padding: 4px 0;
+    }
+    .stApp {
+        background-color: #f5f5f5;
+    }
+    div[data-testid="stToolbar"] {
+        display: none;
+    }
+    #MainMenu {
+        display: none;
+    }
+    footer {
+        display: none;
+    }
+    div[data-testid="stDecoration"] {
+        display: none;
+    }
+    div[data-testid="stStatusWidget"] {
+        display: none;
+    }
+    .stApp > header {
+        display: none;
+    }
+    .stForm button {
+        background-color: #1e88e5;
+        color: white;
+        font-weight: 500;
+        padding: 8px 16px;
+    }
+    .stForm button:hover {
+        background-color: #1976d2;
+        border-color: #1976d2;
     }
 </style>
 """,
     unsafe_allow_html=True,
 )
+
+# Скрываем меню и футер
+hide_streamlit_style = """
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+</style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # Настройки из Streamlit secrets
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
@@ -261,7 +302,7 @@ def main():
     st.markdown(
         """
         <div class="profile-container">
-            <img src="profile.jpg" class="profile-photo" alt="Евгений Братковский">
+            <img src="static/images/profile.jpg" class="profile-photo" alt="Евгений Братковский">
             <h1>СВОБОДНЫЕ СЛОТЫ</h1>
             <div class="subtitle">БРАТКОВСКОГО ЕВГЕНИЯ</div>
         </div>
