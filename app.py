@@ -696,9 +696,13 @@ def send_email_notification(slot_time, booker_email):
 
                     # Отправляем копию организатору
                     log_email_operation("Отправка копии организатору...")
-                    msg_copy = msg.copy()
+                    # Создаем новое сообщение для организатора
+                    msg_copy = MIMEMultipart("alternative")
+                    msg_copy["From"] = GMAIL_SENDER
                     msg_copy["To"] = GMAIL_SENDER
                     msg_copy["Subject"] = f"📋 Новая встреча: {booker_email}"
+                    msg_copy.attach(MIMEText(text_body, "plain"))
+                    msg_copy.attach(MIMEText(html_body, "html"))
                     server.send_message(msg_copy)
                     log_email_operation("Копия организатору отправлена успешно")
 
