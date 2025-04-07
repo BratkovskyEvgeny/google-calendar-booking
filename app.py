@@ -534,13 +534,17 @@ Need to contact the participant? Reply to this invitation or use their email: {b
 
 
 def main():
+    # Инициализация состояния для отображения дополнительных дней
+    if "show_all_days" not in st.session_state:
+        st.session_state.show_all_days = False
+
     # Настраиваем стили
     st.markdown(
         """
         <style>
         /* Общие стили */
         [data-testid="stAppViewContainer"] {
-            background: linear-gradient(135deg, #1a1a1a 0%, #262626 100%);
+            background: linear-gradient(135deg, #1e1e1e 0%, #2b2b2b 100%);
             color: #e0e0e0;
         }
         
@@ -549,31 +553,39 @@ def main():
             text-align: center;
             padding: 2rem 1rem;
             margin-bottom: 2rem;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(43, 43, 43, 0.7);
             border-radius: 15px;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .header-container:hover {
+            border-color: rgba(255, 215, 0, 0.2);
+            box-shadow: 0 6px 16px rgba(255, 215, 0, 0.08);
         }
         
         .header-container h1 {
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
-            background: linear-gradient(45deg, #4dabf7 0%, #3182ce 100%);
+            background: linear-gradient(45deg, #ffd700 0%, #ffb700 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         }
         
         .subtitle {
             font-size: 1.2rem;
-            color: #a0aec0;
+            color: #ffd700;
             margin-bottom: 1.5rem;
             letter-spacing: 1px;
+            opacity: 0.8;
         }
         
         .form-description {
-            color: #cbd5e0;
+            color: #d4d4d4;
             line-height: 1.6;
             font-size: 1rem;
         }
@@ -585,17 +597,23 @@ def main():
             gap: 2rem;
             margin: 2rem 0;
             padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(43, 43, 43, 0.7);
             border-radius: 10px;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .slot-status:hover {
+            border-color: rgba(255, 215, 0, 0.2);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.05);
         }
         
         .status-item {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: #cbd5e0;
+            color: #d4d4d4;
             font-size: 0.95rem;
         }
         
@@ -603,30 +621,37 @@ def main():
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            transition: transform 0.2s ease;
+            transition: all 0.3s ease;
         }
         
         .status-dot.available {
-            background: linear-gradient(45deg, #4dabf7 0%, #3182ce 100%);
-            box-shadow: 0 0 10px rgba(77, 171, 247, 0.5);
+            background: linear-gradient(45deg, #ffd700 0%, #ffb700 100%);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
         }
         
         .status-dot.unavailable {
             background: linear-gradient(45deg, #fc8181 0%, #e53e3e 100%);
-            box-shadow: 0 0 10px rgba(229, 62, 62, 0.5);
+            box-shadow: 0 0 10px rgba(229, 62, 62, 0.3);
         }
         
         /* Заголовок даты */
         .date-header {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(43, 43, 43, 0.7);
             border-radius: 10px;
             padding: 1rem;
             margin: 2rem 0 1rem 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            transition: all 0.3s ease;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        .date-header:hover {
+            border-color: rgba(255, 215, 0, 0.2);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.05);
         }
         
         .date-header h3 {
-            color: #e0e0e0;
+            color: #ffd700;
             font-size: 1.2rem;
             font-weight: 600;
             margin: 0;
@@ -639,17 +664,18 @@ def main():
             border-radius: 8px;
             font-size: 1rem;
             font-weight: 500;
-            transition: all 0.2s ease;
-            background: rgba(77, 171, 247, 0.1);
-            color: #4dabf7;
-            border: 1px solid rgba(77, 171, 247, 0.2);
+            transition: all 0.3s ease;
+            background: rgba(255, 215, 0, 0.1);
+            color: #ffd700;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            animation: fadeIn 0.5s ease-out;
         }
         
         .stButton button:hover {
-            background: rgba(77, 171, 247, 0.2);
-            border-color: rgba(77, 171, 247, 0.4);
+            background: rgba(255, 215, 0, 0.15);
+            border-color: rgba(255, 215, 0, 0.3);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(77, 171, 247, 0.15);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.1);
         }
         
         button.unavailable {
@@ -668,82 +694,42 @@ def main():
         
         /* Форма бронирования */
         .booking-form {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(43, 43, 43, 0.7);
             border-radius: 15px;
             padding: 2rem;
             margin: 2rem 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.1);
             backdrop-filter: blur(10px);
+            animation: slideUp 0.5s ease-out;
+            transition: all 0.3s ease;
+        }
+        
+        .booking-form:hover {
+            border-color: rgba(255, 215, 0, 0.2);
+            box-shadow: 0 6px 16px rgba(255, 215, 0, 0.08);
         }
         
         .form-header {
             font-size: 1.5rem;
             font-weight: 600;
-            color: #4dabf7;
+            color: #ffd700;
             margin-bottom: 1.5rem;
         }
         
-        .form-description {
-            color: #cbd5e0;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-description b {
-            color: #e0e0e0;
-        }
-        
-        .form-description ul {
+        /* Чекбокс для отображения дополнительных дней */
+        .show-more-days {
+            background: rgba(43, 43, 43, 0.7);
+            border-radius: 10px;
+            padding: 1rem;
             margin: 1rem 0;
-            padding-left: 1.5rem;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            transition: all 0.3s ease;
+            text-align: center;
         }
         
-        .form-description li {
-            margin: 0.5rem 0;
-            color: #cbd5e0;
-        }
-        
-        /* Поле ввода email */
-        .stTextInput input {
-            background: rgba(255, 255, 255, 0.05) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            border-radius: 8px !important;
-            color: #e0e0e0 !important;
-            padding: 0.75rem 1rem !important;
-            font-size: 1rem !important;
-        }
-        
-        .stTextInput input:focus {
-            border-color: #4dabf7 !important;
-            box-shadow: 0 0 0 1px #4dabf7 !important;
-        }
-        
-        /* Кнопка подтверждения */
-        .stButton button[kind="primary"] {
-            background: linear-gradient(45deg, #4dabf7 0%, #3182ce 100%) !important;
-            color: white !important;
-            border: none !important;
-            padding: 0.75rem 2rem !important;
-            font-weight: 600 !important;
-            letter-spacing: 0.5px !important;
-        }
-        
-        .stButton button[kind="primary"]:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 4px 12px rgba(77, 171, 247, 0.3) !important;
-        }
-        
-        /* Сообщения об успехе/ошибке */
-        .stAlert {
-            background: rgba(255, 255, 255, 0.05) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            border-radius: 10px !important;
-            backdrop-filter: blur(10px) !important;
-        }
-        
-        /* Скрываем лишние элементы Streamlit */
-        #MainMenu, footer, header {
-            visibility: hidden;
+        .show-more-days:hover {
+            border-color: rgba(255, 215, 0, 0.2);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.05);
         }
         
         /* Анимации */
@@ -752,8 +738,44 @@ def main():
             to { opacity: 1; transform: translateY(0); }
         }
         
-        .header-container, .slot-status, .date-header, .booking-form {
-            animation: fadeIn 0.5s ease-out;
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .header-container {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .slot-status {
+            animation: slideIn 0.7s ease-out;
+        }
+        
+        .calendar-container {
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        /* Стилизация чекбокса Streamlit */
+        .stCheckbox {
+            color: #ffd700 !important;
+        }
+        
+        .stCheckbox > label {
+            color: #ffd700 !important;
+            font-size: 1rem !important;
+        }
+        
+        .stCheckbox > div[role="checkbox"] {
+            border-color: rgba(255, 215, 0, 0.3) !important;
+        }
+        
+        .stCheckbox > div[role="checkbox"][aria-checked="true"] {
+            background-color: #ffd700 !important;
         }
         </style>
         """,
@@ -817,18 +839,24 @@ def main():
             slots_by_day[day] = []
         slots_by_day[day].append((slot, info))
 
+    # Добавляем чекбокс для отображения дополнительных дней
+    st.markdown('<div class="show-more-days">', unsafe_allow_html=True)
+    st.checkbox("📅 Показать все доступные дни", key="show_all_days")
+    st.markdown("</div>", unsafe_allow_html=True)
+
     # Создаем общий контейнер для календаря
     st.markdown('<div class="calendar-container">', unsafe_allow_html=True)
 
-    # Отображение слотов по дням
-    for day, slots in slots_by_day.items():
+    # Отображение слотов по дням с учетом выбранного количества дней
+    sorted_days = sorted(slots_by_day.keys())
+    days_to_show = sorted_days if st.session_state.show_all_days else sorted_days[:3]
+
+    for day in days_to_show:
+        slots = slots_by_day[day]
         date_obj = datetime.strptime(day, "%Y-%m-%d")
-
-        # Форматируем дату в соответствии с настройками (31/12/2025)
         formatted_date = date_obj.strftime("%d/%m/%Y")
-        weekday = date_obj.strftime("%A")  # Полное название дня недели на английском
+        weekday = date_obj.strftime("%A")
 
-        # Создаем контейнер для даты
         st.markdown(
             f"""
             <div class="date-header">
