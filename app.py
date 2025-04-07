@@ -518,7 +518,7 @@ st.markdown(
         -webkit-text-fill-color: transparent;
         opacity: 0.95;
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        animation: shine 4s linear infinite;
+        animation: shine 4s linear infinite, pulse 2s ease-in-out infinite;
     }
     
     .form-description {
@@ -531,6 +531,21 @@ st.markdown(
         margin-right: auto;
         opacity: 0.9;
         text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        50% {
+            transform: scale(1.05);
+            text-shadow: 3px 3px 6px rgba(255, 215, 0, 0.4);
+        }
+        100% {
+            transform: scale(1);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
     }
 
     /* Улучшенные кнопки слотов */
@@ -717,6 +732,128 @@ st.markdown(
         to {
             opacity: 1;
             transform: translateX(0);
+        }
+    }
+
+    /* Медиа-запросы для мобильных устройств */
+    @media screen and (max-width: 768px) {
+        .header-container {
+            padding: 2rem 1rem;
+            margin-bottom: 2rem;
+            border-radius: 16px;
+        }
+        
+        .header-container h1 {
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            margin: 0.8rem 0;
+        }
+        
+        .form-description {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin: 1.5rem 0 0;
+            padding: 0 0.5rem;
+        }
+
+        /* Адаптация кнопок слотов для мобильных устройств */
+        .slot-button {
+            width: 100% !important;
+            margin: 0.5rem 0 !important;
+            padding: 0.8rem !important;
+            font-size: 0.9rem !important;
+        }
+
+        /* Адаптация формы для мобильных устройств */
+        .stTextInput, .stButton {
+            width: 100% !important;
+            max-width: none !important;
+        }
+
+        input[type="text"], input[type="email"] {
+            font-size: 1rem !important;
+            padding: 0.5rem !important;
+        }
+
+        .stButton > button {
+            width: 100% !important;
+            padding: 0.5rem 1rem !important;
+            font-size: 1rem !important;
+        }
+    }
+
+    /* Медиа-запросы для маленьких мобильных устройств */
+    @media screen and (max-width: 480px) {
+        .header-container {
+            padding: 1.5rem 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .header-container h1 {
+            font-size: 1.5rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            letter-spacing: 1.5px;
+        }
+        
+        .form-description {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin: 1.2rem 0 0;
+        }
+
+        /* Дополнительные стили для очень маленьких экранов */
+        .stMarkdown {
+            font-size: 0.9rem !important;
+        }
+
+        .stSelectbox {
+            max-width: 100% !important;
+        }
+
+        /* Улучшение читаемости на маленьких экранах */
+        .form-description br {
+            display: none;
+        }
+        
+        .form-description {
+            text-align: left;
+        }
+    }
+
+    /* Оптимизация для планшетов */
+    @media screen and (min-width: 769px) and (max-width: 1024px) {
+        .header-container {
+            padding: 2.5rem 1.2rem;
+        }
+        
+        .header-container h1 {
+            font-size: 2rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+        }
+        
+        .form-description {
+            font-size: 1rem;
+            max-width: 90%;
+        }
+
+        /* Адаптация сетки слотов для планшетов */
+        .slot-button {
+            width: calc(50% - 1rem) !important;
+            margin: 0.5rem !important;
         }
     }
 </style>
