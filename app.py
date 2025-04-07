@@ -397,10 +397,23 @@ def get_free_slots():
 def send_email_notification(slot_time, booker_email):
     """Отправка уведомления на email"""
     try:
+        # Проверяем наличие необходимых настроек
+        if not GMAIL_SENDER:
+            st.error("Ошибка: Не указан email отправителя (GMAIL_SENDER) в настройках")
+            return False
+
+        if not GMAIL_APP_PASSWORD:
+            st.error(
+                "Ошибка: Не указан пароль приложения Gmail (GMAIL_APP_PASSWORD) в настройках"
+            )
+            return False
+
+        st.info(f"Подготовка к отправке email на адрес: {booker_email}")
+
         # Создаем основное сообщение
         msg = MIMEMultipart("alternative")
         msg["From"] = GMAIL_SENDER
-        msg["To"] = booker_email  # Отправляем на email бронирующего
+        msg["To"] = booker_email
         msg["Subject"] = "🎉 Встреча успешно забронирована!"
 
         # HTML версия письма
@@ -458,21 +471,42 @@ def send_email_notification(slot_time, booker_email):
         msg.attach(MIMEText(text_body, "plain"))
         msg.attach(MIMEText(html_body, "html"))
 
+        st.info("Подключение к серверу Gmail...")
+
         # Отправляем письмо
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(GMAIL_SENDER, GMAIL_APP_PASSWORD)
-            # Отправляем копию организатору
-            msg_copy = msg.copy()
-            msg_copy["To"] = GMAIL_SENDER
-            msg_copy["Subject"] = f"📋 Новая встреча: {booker_email}"
-            server.send_message(msg_copy)
+        try:
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                st.info(f"Авторизация на сервере Gmail с адресом {GMAIL_SENDER}...")
+                server.login(GMAIL_SENDER, GMAIL_APP_PASSWORD)
 
-            # Отправляем основное письмо участнику
-            server.send_message(msg)
+                # Отправляем копию организатору
+                st.info("Отправка копии организатору...")
+                msg_copy = msg.copy()
+                msg_copy["To"] = GMAIL_SENDER
+                msg_copy["Subject"] = f"📋 Новая встреча: {booker_email}"
+                server.send_message(msg_copy)
+                st.info("Копия организатору отправлена успешно")
 
-        return True
+                # Отправляем основное письмо участнику
+                st.info(f"Отправка письма участнику ({booker_email})...")
+                server.send_message(msg)
+                st.info("Письмо участнику отправлено успешно")
+
+            st.success("✅ Все уведомления успешно отправлены!")
+            return True
+
+        except smtplib.SMTPAuthenticationError as auth_error:
+            st.error(f"Ошибка аутентификации Gmail: {str(auth_error)}")
+            st.error("Проверьте правильность email и пароля приложения в настройках")
+            return False
+
+        except smtplib.SMTPException as smtp_error:
+            st.error(f"Ошибка SMTP при отправке: {str(smtp_error)}")
+            return False
+
     except Exception as e:
-        st.error(f"Ошибка отправки email: {str(e)}")
+        st.error(f"Общая ошибка при отправке email: {str(e)}")
+        st.error("Проверьте все настройки и попробуйте еще раз")
         return False
 
 
