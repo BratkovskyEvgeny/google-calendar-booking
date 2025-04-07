@@ -399,23 +399,32 @@ def send_email_notification(slot_time, booker_email):
     msg = MIMEMultipart()
     msg["From"] = GMAIL_SENDER
     msg["To"] = GMAIL_SENDER
-    msg["Subject"] = "🗓️ New Meeting Booking"
+    msg["Subject"] = "🗓️ New Meeting Request"
 
-    # Создаем HTML версию письма
+    # Создаем HTML версию письма с более подробной информацией
     html_body = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333;">
         <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #4dabf7;">New Meeting Booking</h2>
+            <h2 style="color: #4dabf7;">New Meeting Request</h2>
             <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
                 <p><strong>📅 Date and time:</strong> {slot_time}</p>
                 <p><strong>📧 Participant email:</strong> {booker_email}</p>
                 <p><strong>⏱️ Duration:</strong> 1 hour</p>
             </div>
-            <p style="color: #666; font-size: 14px;">
-                The meeting has been automatically added to your Google Calendar.<br>
-                An invitation has been sent to the participant's email.
-            </p>
+            <div style="background-color: #e9ecef; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                <p style="margin: 0; color: #495057;"><strong>What happens next:</strong></p>
+                <ul style="color: #495057; margin: 10px 0;">
+                    <li>The meeting has been added to your Google Calendar</li>
+                    <li>You will receive a Google Calendar invitation</li>
+                    <li>You will get an email reminder 1 hour before the meeting</li>
+                    <li>You will see a popup notification 10 minutes before the meeting</li>
+                </ul>
+            </div>
+            <div style="background-color: #e7f5ff; padding: 15px; border-radius: 5px;">
+                <p style="margin: 0; color: #1971c2;"><strong>Need to reschedule?</strong><br>
+                You can accept, decline, or propose a new time directly in Google Calendar.</p>
+            </div>
         </div>
     </body>
     </html>
@@ -423,14 +432,20 @@ def send_email_notification(slot_time, booker_email):
 
     # Создаем текстовую версию для клиентов, не поддерживающих HTML
     text_body = f"""
-    New Meeting Booking
-    
-    Date and time: {slot_time}
-    Participant email: {booker_email}
-    Duration: 1 hour
-    
-    The meeting has been automatically added to your Google Calendar.
-    An invitation has been sent to the participant's email.
+    New Meeting Request
+
+    📅 Date and time: {slot_time}
+    📧 Participant email: {booker_email}
+    ⏱️ Duration: 1 hour
+
+    What happens next:
+    - The meeting has been added to your Google Calendar
+    - You will receive a Google Calendar invitation
+    - You will get an email reminder 1 hour before the meeting
+    - You will see a popup notification 10 minutes before the meeting
+
+    Need to reschedule?
+    You can accept, decline, or propose a new time directly in Google Calendar.
     """
 
     # Добавляем обе версии в письмо
@@ -457,14 +472,18 @@ def create_calendar_event(slot_time, booker_email):
         slot_time = slot_time.astimezone(moscow_tz)
 
     event = {
-        "summary": f"👥 Встреча с {booker_email}",
+        "summary": f"👥 Meeting with {booker_email}",
         "description": f"""
-Встреча забронирована через систему бронирования.
+Meeting Request Details:
 
-Участник: {booker_email}
-Длительность: 1 час
+👤 Participant: {booker_email}
+⏱️ Duration: 1 hour
+📍 Location: Google Meet (link will be generated automatically)
 
-Автоматически создано системой бронирования встреч.
+This meeting was booked through the Meeting Scheduler system.
+You can accept, decline, or propose a new time using the options above.
+
+Need to contact the participant? Reply to this invitation or use their email: {booker_email}
 """,
         "start": {
             "dateTime": slot_time.isoformat(),
@@ -478,35 +497,279 @@ def create_calendar_event(slot_time, booker_email):
             {"email": booker_email},
             {"email": GMAIL_SENDER},
         ],
-        "sendUpdates": "all",
+        "sendUpdates": "all",  # Отправляем уведомления всем участникам
         "reminders": {
             "useDefault": False,
             "overrides": [
-                {"method": "email", "minutes": 60},
-                {"method": "popup", "minutes": 10},
+                {"method": "email", "minutes": 60},  # Email за час до встречи
+                {
+                    "method": "popup",
+                    "minutes": 10,
+                },  # Всплывающее уведомление за 10 минут
             ],
+        },
+        "conferenceData": {
+            "createRequest": {
+                "requestId": f"meeting_{int(datetime.now().timestamp())}",
+                "conferenceSolutionKey": {"type": "hangoutsMeet"},
+            }
         },
     }
 
     try:
-        event = service.events().insert(calendarId="primary", body=event).execute()
+        event = (
+            service.events()
+            .insert(
+                calendarId="primary",
+                body=event,
+                conferenceDataVersion=1,  # Добавляем поддержку Google Meet
+                sendUpdates="all",  # Отправляем уведомления всем участникам
+            )
+            .execute()
+        )
         return True
     except Exception as e:
-        st.error(f"Ошибка при создании события: {str(e)}")
+        st.error(f"Error creating event: {str(e)}")
         return False
 
 
 def main():
+    # Настраиваем стили
+    st.markdown(
+        """
+        <style>
+        /* Общие стили */
+        [data-testid="stAppViewContainer"] {
+            background: linear-gradient(135deg, #1a1a1a 0%, #262626 100%);
+            color: #e0e0e0;
+        }
+        
+        /* Заголовок */
+        .header-container {
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header-container h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #4dabf7 0%, #3182ce 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0aec0;
+            margin-bottom: 1.5rem;
+            letter-spacing: 1px;
+        }
+        
+        .form-description {
+            color: #cbd5e0;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+        
+        /* Статус слотов */
+        .slot-status {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #cbd5e0;
+            font-size: 0.95rem;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+        
+        .status-dot.available {
+            background: linear-gradient(45deg, #4dabf7 0%, #3182ce 100%);
+            box-shadow: 0 0 10px rgba(77, 171, 247, 0.5);
+        }
+        
+        .status-dot.unavailable {
+            background: linear-gradient(45deg, #fc8181 0%, #e53e3e 100%);
+            box-shadow: 0 0 10px rgba(229, 62, 62, 0.5);
+        }
+        
+        /* Заголовок даты */
+        .date-header {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 2rem 0 1rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .date-header h3 {
+            color: #e0e0e0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        /* Кнопки слотов */
+        .stButton button {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            background: rgba(77, 171, 247, 0.1);
+            color: #4dabf7;
+            border: 1px solid rgba(77, 171, 247, 0.2);
+        }
+        
+        .stButton button:hover {
+            background: rgba(77, 171, 247, 0.2);
+            border-color: rgba(77, 171, 247, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(77, 171, 247, 0.15);
+        }
+        
+        button.unavailable {
+            background: rgba(229, 62, 62, 0.1) !important;
+            color: #fc8181 !important;
+            border: 1px solid rgba(229, 62, 62, 0.2) !important;
+            cursor: not-allowed !important;
+            opacity: 0.8 !important;
+        }
+        
+        button.unavailable:hover {
+            background: rgba(229, 62, 62, 0.1) !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        /* Форма бронирования */
+        .booking-form {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #4dabf7;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-description {
+            color: #cbd5e0;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-description b {
+            color: #e0e0e0;
+        }
+        
+        .form-description ul {
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+        }
+        
+        .form-description li {
+            margin: 0.5rem 0;
+            color: #cbd5e0;
+        }
+        
+        /* Поле ввода email */
+        .stTextInput input {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 8px !important;
+            color: #e0e0e0 !important;
+            padding: 0.75rem 1rem !important;
+            font-size: 1rem !important;
+        }
+        
+        .stTextInput input:focus {
+            border-color: #4dabf7 !important;
+            box-shadow: 0 0 0 1px #4dabf7 !important;
+        }
+        
+        /* Кнопка подтверждения */
+        .stButton button[kind="primary"] {
+            background: linear-gradient(45deg, #4dabf7 0%, #3182ce 100%) !important;
+            color: white !important;
+            border: none !important;
+            padding: 0.75rem 2rem !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.5px !important;
+        }
+        
+        .stButton button[kind="primary"]:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 12px rgba(77, 171, 247, 0.3) !important;
+        }
+        
+        /* Сообщения об успехе/ошибке */
+        .stAlert {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 10px !important;
+            backdrop-filter: blur(10px) !important;
+        }
+        
+        /* Скрываем лишние элементы Streamlit */
+        #MainMenu, footer, header {
+            visibility: hidden;
+        }
+        
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .header-container, .slot-status, .date-header, .booking-form {
+            animation: fadeIn 0.5s ease-out;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
     # Добавляем заголовок
     st.markdown(
         """
         <div class="header-container">
-            <h1>AVAILABLE SLOTS</h1>
+            <h1>MEETING SCHEDULER</h1>
             <div class="subtitle">BRATKOVSKY EVGENY</div>
-            <div class="form-description" style="margin-top: 20px; text-align: center;">
-            Choose a convenient time for the meeting. Meeting duration - 1 hour.<br>
-            Working hours: 9:00 AM to 6:00 PM (last meeting at 5:00 PM)<br>
-            After selecting the time, you will need to enter your email to receive confirmation.
+            <div class="form-description">
+                Choose a convenient time for the meeting. Meeting duration - 1 hour.<br>
+                Working hours: 9:00 AM to 6:00 PM (last meeting at 5:00 PM)<br>
+                After selecting the time, you will need to enter your email to receive confirmation.
             </div>
         </div>
         """,
