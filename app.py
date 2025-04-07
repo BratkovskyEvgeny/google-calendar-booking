@@ -340,11 +340,11 @@ st.markdown(
     .slot-button:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        background: linear-gradient(145deg, #37bc5c, #32a852);
+        background: linear-gradient(145deg, #37bc5c, #32a852) !important;
     }
 
     .slot-button.unavailable {
-        background: linear-gradient(145deg, #dc3545, #c82333);
+        background: linear-gradient(145deg, #dc3545, #c82333) !important;
         cursor: not-allowed;
         opacity: 0.7;
     }
@@ -352,7 +352,7 @@ st.markdown(
     .slot-button.unavailable:hover {
         transform: none;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        background: linear-gradient(145deg, #dc3545, #c82333);
+        background: linear-gradient(145deg, #dc3545, #c82333) !important;
     }
 
     /* Стили для индикаторов статуса */
@@ -381,6 +381,24 @@ st.markdown(
 
     .status-dot.unavailable {
         background: linear-gradient(145deg, #dc3545, #c82333);
+    }
+
+    /* Переопределение стилей Streamlit */
+    button[kind="secondary"] {
+        background: linear-gradient(145deg, #32a852, #2d9649) !important;
+        border: none !important;
+        color: white !important;
+    }
+
+    button[kind="secondary"]:hover {
+        background: linear-gradient(145deg, #37bc5c, #32a852) !important;
+        border: none !important;
+        color: white !important;
+    }
+
+    div[data-testid="stNotificationContent"] {
+        animation: none !important;
+        transition: opacity 0.5s ease !important;
     }
 </style>
 """,
