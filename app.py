@@ -744,13 +744,11 @@ st.markdown(
         }
         
         .header-container h1 {
-            font-size: 1.4rem;
-            letter-spacing: 0px;
-            margin-bottom: 0.5rem;
-            line-height: 1.4;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            line-height: 1.3;
             padding: 0 0.3rem;
-            word-break: break-word;
-            hyphens: auto;
         }
 
         .mobile-break {
@@ -758,17 +756,18 @@ st.markdown(
         }
         
         .subtitle {
-            font-size: 1rem;
+            font-size: 1.2rem;
             letter-spacing: 1.5px;
-            margin: 0.8rem 0;
-            line-height: 1.4;
+            margin: 1rem 0;
+            line-height: 1.6;
             padding: 0 0.5rem;
+            word-spacing: 2px;
         }
         
         .form-description {
             font-size: 0.9rem;
             line-height: 1.5;
-            margin: 1.2rem 0 0;
+            margin: 1.5rem 0 0;
             padding: 0 0.8rem;
         }
     }
@@ -781,23 +780,22 @@ st.markdown(
         }
         
         .header-container h1 {
-            font-size: 1.2rem;
-            letter-spacing: 0px;
+            font-size: 1.6rem;
+            letter-spacing: 0.5px;
             padding: 0 0.2rem;
-            word-break: break-word;
-            hyphens: auto;
         }
         
         .subtitle {
-            font-size: 0.9rem;
+            font-size: 1.1rem;
             letter-spacing: 1px;
             padding: 0 0.3rem;
+            word-spacing: 1px;
         }
         
         .form-description {
             font-size: 0.85rem;
             line-height: 1.4;
-            margin: 1rem 0 0;
+            margin: 1.2rem 0 0;
             padding: 0 0.5rem;
         }
     }
@@ -805,23 +803,34 @@ st.markdown(
     /* Для очень маленьких экранов */
     @media screen and (max-width: 360px) {
         .header-container h1 {
-            font-size: 1.1rem;
+            font-size: 1.4rem;
             letter-spacing: 0px;
             padding: 0 0.2rem;
-            word-break: break-word;
-            hyphens: auto;
         }
         
         .subtitle {
-            font-size: 0.8rem;
+            font-size: 1rem;
             letter-spacing: 0.5px;
+            word-spacing: 1px;
         }
     }
 
-    /* Для десктопов скрываем переносы строк */
+    /* Для десктопов */
     @media screen and (min-width: 769px) {
         .mobile-break {
             display: none;
+        }
+        
+        .header-container h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1.6rem;
+            letter-spacing: 2px;
+            word-spacing: 4px;
+            margin: 1.5rem 0;
         }
     }
 </style>
@@ -1490,8 +1499,8 @@ def main():
     st.markdown(
         """
         <div class="header-container">
-            <h1>АССИСТЕНТ<br class="mobile-break"> ПО ПЛАНИРОВАНИЮ<br class="mobile-break"> ВСТРЕЧ</h1>
-            <div class="subtitle">БРАТКОВСКИЙ<br class="mobile-break">ЕВГЕНИЙ ВИКТОРОВИЧ</div>
+            <h1>СВОБОДНЫЕ СЛОТЫ</h1>
+            <div class="subtitle">БРАТКОВСКИЙ<br class="mobile-break"> ЕВГЕНИЙ<br class="mobile-break"> ВИКТОРОВИЧ</div>
             <div class="form-description">
                 Выберите удобное время для встречи. Продолжительность встречи - 1 час.<br>
                 Рабочие часы: с 9:00 до 18:00 (последняя встреча в 17:00)<br>
