@@ -188,6 +188,61 @@ st.markdown(
     button[kind="primary"]:hover {
         background-color: #339af0 !important;
     }
+    .stButton button.unavailable {
+        background-color: #3c2222 !important;
+        color: #ff6b6b !important;
+        border-color: #ff6b6b !important;
+        cursor: not-allowed !important;
+        opacity: 0.7;
+    }
+    .stButton button.unavailable:hover {
+        background-color: #3c2222 !important;
+        color: #ff6b6b !important;
+        border-color: #ff6b6b !important;
+        transform: none !important;
+    }
+    button.unavailable {
+        background-color: #3c2222 !important;
+        color: #ff6b6b !important;
+        border: 1px solid #ff6b6b !important;
+        cursor: not-allowed !important;
+        opacity: 0.7 !important;
+        pointer-events: none !important;
+    }
+    button.unavailable:hover {
+        background-color: #3c2222 !important;
+        color: #ff6b6b !important;
+        border-color: #ff6b6b !important;
+        transform: none !important;
+    }
+    .slot-status {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin: 20px 0;
+        padding: 10px;
+        background-color: #2b2b2b;
+        border-radius: 4px;
+        border: 1px solid #3c3f41;
+    }
+    .status-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #a9b7c6;
+        font-size: 0.9rem;
+    }
+    .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+    .status-dot.available {
+        background-color: #4dabf7;
+    }
+    .status-dot.unavailable {
+        background-color: #ff6b6b;
+    }
 </style>
 """,
     unsafe_allow_html=True,
@@ -236,7 +291,7 @@ def get_google_calendar_service():
 
 
 def get_free_slots():
-    """Получение свободных слотов из календаря"""
+    """Получение свободных и занятых слотов из календаря"""
     service = get_google_calendar_service()
 
     # Получаем временные границы для проверки (следующие 2 недели)
@@ -257,8 +312,24 @@ def get_free_slots():
     )
 
     events = events_result.get("items", [])
+    busy_slots = []
 
-    # Создаем список всех возможных слотов (с 9:00 до 18:00, по 30 минут)
+    # Преобразуем события в список занятых слотов
+    for event in events:
+        start = datetime.fromisoformat(
+            event["start"].get("dateTime", event["start"].get("date"))
+        ).astimezone(pytz.UTC)
+        end = datetime.fromisoformat(
+            event["end"].get("dateTime", event["end"].get("date"))
+        ).astimezone(pytz.UTC)
+
+        # Добавляем все часовые слоты в период события
+        current = start
+        while current < end:
+            busy_slots.append(current)
+            current += timedelta(hours=1)
+
+    # Создаем список всех возможных слотов
     all_slots = []
     current = now.replace(hour=9, minute=0, second=0, microsecond=0)
     if current < now:
@@ -267,38 +338,32 @@ def get_free_slots():
     while current < end_date:
         if (
             current.hour >= 9 and current.hour < 18 and current.weekday() < 5
-        ):  # Только рабочие часы и дни
-            all_slots.append(current)
-        current += timedelta(minutes=30)
+        ):  # Рабочий день с 9 до 18
+            # Добавляем слот только если встреча закончится до 18:00
+            if current.hour < 17:  # Последняя встреча начинается в 17:00
+                all_slots.append(current)
+        current += timedelta(hours=1)
         if current.hour >= 18:
             current = (current + timedelta(days=1)).replace(hour=9, minute=0)
 
-    # Фильтруем занятые слоты
-    free_slots = []
+    # Возвращаем словарь с информацией о статусе каждого слота
+    slots_info = {}
     for slot in all_slots:
-        is_free = True
-        slot_end = slot + timedelta(minutes=30)
+        # Проверяем, не пересекается ли слот с уже занятыми
+        slot_end = slot + timedelta(hours=1)
+        is_busy = any(
+            (busy <= slot < busy + timedelta(hours=1))
+            or (busy < slot_end <= busy + timedelta(hours=1))
+            or (slot <= busy < slot_end)
+            for busy in busy_slots
+        )
+        slots_info[slot] = {"is_busy": is_busy}
 
-        for event in events:
-            start = datetime.fromisoformat(
-                event["start"].get("dateTime", event["start"].get("date"))
-            ).astimezone(pytz.UTC)
-            end = datetime.fromisoformat(
-                event["end"].get("dateTime", event["end"].get("date"))
-            ).astimezone(pytz.UTC)
-
-            if slot < end and slot_end > start:
-                is_free = False
-                break
-
-        if is_free:
-            free_slots.append(slot)
-
-    return free_slots
+    return slots_info
 
 
 def send_email_notification(slot_time, booker_email):
-    """Отправка уведомления на email"""
+    """Отправка уведомления на email владельца"""
     msg = MIMEMultipart()
     msg["From"] = GMAIL_SENDER
     msg["To"] = GMAIL_SENDER
@@ -334,12 +399,16 @@ def create_calendar_event(slot_time, booker_email):
             "timeZone": "UTC",
         },
         "end": {
-            "dateTime": (slot_time + timedelta(minutes=30)).isoformat(),
+            "dateTime": (
+                slot_time + timedelta(hours=1)
+            ).isoformat(),  # Изменено на 1 час
             "timeZone": "UTC",
         },
         "attendees": [
             {"email": booker_email},
+            {"email": GMAIL_SENDER},
         ],
+        "sendUpdates": "all",
     }
 
     try:
@@ -357,6 +426,28 @@ def main():
         <div class="header-container">
             <h1>СВОБОДНЫЕ СЛОТЫ</h1>
             <div class="subtitle">БРАТКОВСКОГО ЕВГЕНИЯ</div>
+            <div class="form-description" style="margin-top: 20px; text-align: center;">
+            Выберите удобное время для встречи. Длительность встречи - 1 час.<br>
+            Рабочий день: с 9:00 до 18:00 (последняя встреча в 17:00)<br>
+            После выбора времени вам нужно будет указать свой email для получения подтверждения.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Добавляем легенду статусов
+    st.markdown(
+        """
+        <div class="slot-status">
+            <div class="status-item">
+                <div class="status-dot available"></div>
+                Свободно
+            </div>
+            <div class="status-item">
+                <div class="status-dot unavailable"></div>
+                Занято
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -367,24 +458,24 @@ def main():
         st.error("Необходимо настроить OAuth. Пожалуйста, свяжитесь с администратором.")
         st.stop()
 
-    # Получение свободных слотов
+    # Получение информации о слотах
     try:
-        free_slots = get_free_slots()
+        slots_info = get_free_slots()
     except Exception as e:
-        st.error(f"Ошибка при получении свободных слотов: {str(e)}")
+        st.error(f"Ошибка при получении слотов: {str(e)}")
         return
 
-    if not free_slots:
+    if not slots_info:
         st.warning("⚠️ Нет доступных слотов на ближайшие 2 недели")
         return
 
     # Группировка слотов по дням
     slots_by_day = {}
-    for slot in free_slots:
+    for slot, info in slots_info.items():
         day = slot.strftime("%Y-%m-%d")
         if day not in slots_by_day:
             slots_by_day[day] = []
-        slots_by_day[day].append(slot)
+        slots_by_day[day].append((slot, info))
 
     # Создаем общий контейнер для календаря
     st.markdown('<div class="calendar-container">', unsafe_allow_html=True)
@@ -405,29 +496,42 @@ def main():
 
         # Создаем сетку для временных слотов (6 колонок)
         cols = st.columns(6)
-        for i, slot in enumerate(slots):
+        for i, (slot, info) in enumerate(slots):
             with cols[i % 6]:
-                if st.button(
-                    slot.strftime("%H:%M"),
-                    key=slot.isoformat(),
-                    use_container_width=True,
-                ):
-                    st.session_state.selected_slot = slot
-                    st.session_state.show_booking_form = True
+                if info["is_busy"]:
+                    st.markdown(
+                        f'<button class="unavailable" disabled>{slot.strftime("%H:%M")}</button>',
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    if st.button(
+                        slot.strftime("%H:%M"),
+                        key=slot.isoformat(),
+                        use_container_width=True,
+                    ):
+                        st.session_state.selected_slot = slot
+                        st.session_state.show_booking_form = True
 
     st.markdown("</div>", unsafe_allow_html=True)
 
     # Форма бронирования
     if "show_booking_form" in st.session_state and st.session_state.show_booking_form:
-        st.markdown('<div class="booking-form">', unsafe_allow_html=True)
+        selected_time = st.session_state.selected_slot.strftime("%d %B %Y, %H:%M")
 
-        # Добавляем описание формы
+        st.markdown('<div class="booking-form">', unsafe_allow_html=True)
         st.markdown(
-            """
+            f"""
             <div class="form-header">📝 Бронирование встречи</div>
             <div class="form-description">
-            Для бронирования встречи, пожалуйста, введите ваш email адрес. 
-            На него будет отправлено подтверждение бронирования и детали встречи.
+            <b>Выбранное время:</b> {selected_time}<br>
+            <b>Длительность:</b> 1 час<br><br>
+            Для подтверждения бронирования, пожалуйста, введите ваш email адрес.<br>
+            На этот адрес будут отправлены:
+            <ul>
+                <li>Подтверждение бронирования</li>
+                <li>Ссылка для подключения к встрече</li>
+                <li>Напоминание за 1 час до встречи</li>
+            </ul>
             </div>
             """,
             unsafe_allow_html=True,
@@ -435,22 +539,27 @@ def main():
 
         with st.form("booking_form"):
             booker_email = st.text_input(
-                "📧 Ваш email адрес:",
-                help="Введите email, на который вы хотите получить подтверждение бронирования",
+                "📧 Ваш email адрес",
+                help="На этот адрес будет отправлено подтверждение бронирования и детали встречи",
             )
-            submitted = st.form_submit_button("✅ Забронировать встречу")
+            submitted = st.form_submit_button("✅ Подтвердить бронирование")
 
-            if submitted and booker_email:
-                if create_calendar_event(st.session_state.selected_slot, booker_email):
-                    if send_email_notification(
-                        st.session_state.selected_slot.strftime("%Y-%m-%d %H:%M"),
-                        booker_email,
+            if submitted:
+                if not booker_email:
+                    st.error("Пожалуйста, введите ваш email адрес")
+                else:
+                    if create_calendar_event(
+                        st.session_state.selected_slot, booker_email
                     ):
-                        st.success(
-                            "🎉 Встреча успешно забронирована! Проверьте вашу почту для получения деталей."
-                        )
-                    st.session_state.show_booking_form = False
-                    st.rerun()
+                        if send_email_notification(
+                            st.session_state.selected_slot.strftime("%Y-%m-%d %H:%M"),
+                            booker_email,
+                        ):
+                            st.success(
+                                "🎉 Встреча успешно забронирована! Проверьте вашу почту для получения деталей."
+                            )
+                        st.session_state.show_booking_form = False
+                        st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
 
