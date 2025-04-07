@@ -375,7 +375,8 @@ st.markdown(
         animation: pulse 1.5s infinite;
     }
 
-    .stButton > button.selected {
+    /* Стиль для выбранного слота */
+    .stButton > button[data-selected="true"] {
         background: rgba(255, 165, 0, 0.4) !important;
         border-color: rgba(255, 165, 0, 0.6) !important;
         color: #ffffff !important;
@@ -430,53 +431,6 @@ st.markdown(
 
     .stButton > button.unavailable::before {
         display: none;
-    }
-
-    /* Стили для индикаторов статуса */
-    .slot-status {
-        display: flex;
-        gap: 20px;
-        margin: 20px 0;
-        justify-content: center;
-    }
-
-    .status-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .status-dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-    }
-
-    .status-dot.available {
-        background: rgba(43, 43, 43, 0.7);
-        border: 1px solid rgba(255, 215, 0, 0.2);
-    }
-
-    .status-dot.unavailable {
-        background: linear-gradient(145deg, #dc3545, #c82333);
-    }
-
-    /* Переопределение стилей Streamlit */
-    button[kind="secondary"] {
-        background: rgba(43, 43, 43, 0.7) !important;
-        border: 1px solid rgba(255, 215, 0, 0.1) !important;
-        color: #a9b7c6 !important;
-    }
-
-    button[kind="secondary"]:hover {
-        background: rgba(43, 43, 43, 0.9) !important;
-        border-color: rgba(255, 215, 0, 0.2) !important;
-        color: #a9b7c6 !important;
-    }
-
-    div[data-testid="stNotificationContent"] {
-        animation: none !important;
-        transition: opacity 0.5s ease !important;
     }
 </style>
 """,
@@ -1218,17 +1172,16 @@ def main():
                         unsafe_allow_html=True,
                     )
                 else:
-                    button_class = (
-                        "selected"
-                        if slot == st.session_state.get("selected_slot")
-                        else ""
+                    is_selected = slot == st.session_state.get("selected_slot")
+                    st.markdown(
+                        f'<button data-selected="{str(is_selected).lower()}" onclick="document.getElementById(\'slot_{slot.isoformat()}\').click()">{info["time"]}</button>',
+                        unsafe_allow_html=True,
                     )
                     if st.button(
                         info["time"],
-                        key=slot.isoformat(),
+                        key=f"slot_{slot.isoformat()}",
                         use_container_width=True,
                         type="secondary",
-                        kwargs={"class": button_class},
                     ):
                         st.session_state.selected_slot = slot
                         st.session_state.show_booking_form = True
