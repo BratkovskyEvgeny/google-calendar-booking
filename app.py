@@ -546,15 +546,21 @@ def main():
         [data-testid="stAppViewContainer"] {
             background: linear-gradient(135deg, #1e1e1e 0%, #2b2b2b 100%);
             color: #e0e0e0;
+            padding: 0 !important;
+        }
+        
+        [data-testid="stVerticalBlock"] {
+            padding: 0 !important;
+            gap: 0 !important;
         }
         
         /* Заголовок */
         .header-container {
             text-align: center;
-            padding: 2rem 1rem;
-            margin-bottom: 2rem;
+            padding: 1.5rem 1rem;
+            margin-bottom: 1rem;
             background: rgba(43, 43, 43, 0.7);
-            border-radius: 15px;
+            border-radius: 8px;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 215, 0, 0.1);
             box-shadow: 0 4px 12px rgba(255, 215, 0, 0.05);
@@ -567,9 +573,9 @@ def main():
         }
         
         .header-container h1 {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
             background: linear-gradient(45deg, #ffd700 0%, #ffb700 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -577,17 +583,18 @@ def main():
         }
         
         .subtitle {
-            font-size: 1.2rem;
+            font-size: 1rem;
             color: #ffd700;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             letter-spacing: 1px;
             opacity: 0.8;
         }
         
         .form-description {
             color: #d4d4d4;
-            line-height: 1.6;
-            font-size: 1rem;
+            line-height: 1.4;
+            font-size: 0.9rem;
+            margin: 0;
         }
         
         /* Статус слотов */
@@ -595,64 +602,39 @@ def main():
             display: flex;
             justify-content: center;
             gap: 2rem;
-            margin: 2rem 0;
-            padding: 1rem;
+            margin: 0.5rem 0;
+            padding: 0.5rem;
             background: rgba(43, 43, 43, 0.7);
-            border-radius: 10px;
+            border-radius: 8px;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 215, 0, 0.1);
             transition: all 0.3s ease;
         }
         
-        .slot-status:hover {
-            border-color: rgba(255, 215, 0, 0.2);
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.05);
-        }
-        
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #d4d4d4;
-            font-size: 0.95rem;
-        }
-        
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
+        /* Чекбокс для отображения дополнительных дней */
+        .show-more-days {
+            background: rgba(43, 43, 43, 0.7);
+            border-radius: 8px;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border: 1px solid rgba(255, 215, 0, 0.1);
             transition: all 0.3s ease;
-        }
-        
-        .status-dot.available {
-            background: linear-gradient(45deg, #ffd700 0%, #ffb700 100%);
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-        }
-        
-        .status-dot.unavailable {
-            background: linear-gradient(45deg, #fc8181 0%, #e53e3e 100%);
-            box-shadow: 0 0 10px rgba(229, 62, 62, 0.3);
+            text-align: center;
         }
         
         /* Заголовок даты */
         .date-header {
             background: rgba(43, 43, 43, 0.7);
-            border-radius: 10px;
-            padding: 1rem;
-            margin: 2rem 0 1rem 0;
+            border-radius: 8px;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
             border: 1px solid rgba(255, 215, 0, 0.1);
             transition: all 0.3s ease;
-            animation: slideIn 0.5s ease-out;
-        }
-        
-        .date-header:hover {
-            border-color: rgba(255, 215, 0, 0.2);
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.05);
         }
         
         .date-header h3 {
             color: #ffd700;
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: 600;
             margin: 0;
         }
@@ -660,122 +642,88 @@ def main():
         /* Кнопки слотов */
         .stButton button {
             width: 100%;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            font-size: 1rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
             font-weight: 500;
             transition: all 0.3s ease;
             background: rgba(255, 215, 0, 0.1);
             color: #ffd700;
             border: 1px solid rgba(255, 215, 0, 0.2);
-            animation: fadeIn 0.5s ease-out;
-        }
-        
-        .stButton button:hover {
-            background: rgba(255, 215, 0, 0.15);
-            border-color: rgba(255, 215, 0, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.1);
-        }
-        
-        button.unavailable {
-            background: rgba(229, 62, 62, 0.1) !important;
-            color: #fc8181 !important;
-            border: 1px solid rgba(229, 62, 62, 0.2) !important;
-            cursor: not-allowed !important;
-            opacity: 0.8 !important;
-        }
-        
-        button.unavailable:hover {
-            background: rgba(229, 62, 62, 0.1) !important;
-            transform: none !important;
-            box-shadow: none !important;
+            margin: 0 !important;
         }
         
         /* Форма бронирования */
         .booking-form {
             background: rgba(43, 43, 43, 0.7);
-            border-radius: 15px;
-            padding: 2rem;
-            margin: 2rem 0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
             border: 1px solid rgba(255, 215, 0, 0.1);
             backdrop-filter: blur(10px);
-            animation: slideUp 0.5s ease-out;
-            transition: all 0.3s ease;
-        }
-        
-        .booking-form:hover {
-            border-color: rgba(255, 215, 0, 0.2);
-            box-shadow: 0 6px 16px rgba(255, 215, 0, 0.08);
         }
         
         .form-header {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: 600;
             color: #ffd700;
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.5rem;
         }
         
-        /* Чекбокс для отображения дополнительных дней */
-        .show-more-days {
-            background: rgba(43, 43, 43, 0.7);
-            border-radius: 10px;
-            padding: 1rem;
-            margin: 1rem 0;
-            border: 1px solid rgba(255, 215, 0, 0.1);
-            transition: all 0.3s ease;
-            text-align: center;
+        /* Стилизация колонок Streamlit */
+        [data-testid="stHorizontalBlock"] {
+            gap: 0.25rem !important;
+            padding: 0 !important;
         }
         
-        .show-more-days:hover {
-            border-color: rgba(255, 215, 0, 0.2);
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.05);
+        /* Убираем отступы у элементов формы */
+        .stTextInput {
+            margin: 0 !important;
         }
         
-        /* Анимации */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .stTextInput > div {
+            margin: 0 !important;
         }
         
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
+        .stForm > div {
+            margin-bottom: 0 !important;
         }
         
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .stForm [data-testid="stFormSubmitButton"] {
+            margin: 0 !important;
         }
         
-        .header-container {
-            animation: fadeIn 0.6s ease-out;
-        }
-        
-        .slot-status {
-            animation: slideIn 0.7s ease-out;
-        }
-        
-        .calendar-container {
-            animation: fadeIn 0.8s ease-out;
-        }
-        
-        /* Стилизация чекбокса Streamlit */
+        /* Убираем отступы у чекбокса */
         .stCheckbox {
-            color: #ffd700 !important;
+            margin: 0 !important;
         }
         
-        .stCheckbox > label {
-            color: #ffd700 !important;
-            font-size: 1rem !important;
+        .stCheckbox > div {
+            margin: 0 !important;
         }
         
-        .stCheckbox > div[role="checkbox"] {
-            border-color: rgba(255, 215, 0, 0.3) !important;
+        /* Убираем отступы у алертов */
+        .stAlert {
+            margin: 0.5rem 0 !important;
+            padding: 0.5rem !important;
         }
         
-        .stCheckbox > div[role="checkbox"][aria-checked="true"] {
-            background-color: #ffd700 !important;
+        /* Убираем отступы у markdown */
+        .stMarkdown {
+            margin: 0 !important;
+        }
+        
+        .stMarkdown > div {
+            margin: 0 !important;
+        }
+        
+        /* Календарь */
+        .calendar-container {
+            padding: 0.5rem;
+            margin: 0;
+            background: rgba(43, 43, 43, 0.7);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 215, 0, 0.1);
         }
         </style>
         """,
