@@ -349,7 +349,7 @@ st.markdown(
     }
 
     /* Стили для слотов */
-    .slot-button {
+    .stButton > button {
         width: 100%;
         padding: 10px;
         margin: 5px 0;
@@ -367,11 +367,11 @@ st.markdown(
         overflow: hidden;
     }
 
-    .slot-button:hover {
+    .stButton > button:hover {
         transform: translateY(-2px) scale(1.02);
         box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
-        background: rgba(255, 165, 0, 0.2);
-        border-color: rgba(255, 165, 0, 0.4);
+        background: rgba(255, 165, 0, 0.2) !important;
+        border-color: rgba(255, 165, 0, 0.4) !important;
         animation: pulse 1.5s infinite;
     }
 
@@ -387,7 +387,7 @@ st.markdown(
         }
     }
 
-    .slot-button::before {
+    .stButton > button::before {
         content: '';
         position: absolute;
         top: 0;
@@ -403,20 +403,24 @@ st.markdown(
         transition: 0.5s;
     }
 
-    .slot-button.unavailable {
+    .stButton > button:hover::before {
+        left: 100%;
+    }
+
+    .stButton > button.unavailable {
         background: linear-gradient(145deg, #dc3545, #c82333) !important;
         cursor: not-allowed;
         opacity: 0.7;
     }
 
-    .slot-button.unavailable:hover {
+    .stButton > button.unavailable:hover {
         transform: none;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         background: linear-gradient(145deg, #dc3545, #c82333) !important;
         animation: none;
     }
 
-    .slot-button.unavailable::before {
+    .stButton > button.unavailable::before {
         display: none;
     }
 
