@@ -862,6 +862,7 @@ def main():
             booker_email = st.text_input(
                 "📧 Your email address",
                 help="You will receive booking confirmation and meeting details at this address",
+                placeholder="zhenyabratkovski5@gmail.com",
             )
             submitted = st.form_submit_button("✅ Confirm Booking")
 
