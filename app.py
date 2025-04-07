@@ -294,16 +294,22 @@ def get_free_slots():
     """Получение свободных и занятых слотов из календаря"""
     service = get_google_calendar_service()
 
-    # Получаем временные границы для проверки (следующие 2 недели)
-    now = datetime.now(pytz.UTC)
-    end_date = now + timedelta(days=14)
+    # Устанавливаем московский часовой пояс
+    moscow_tz = pytz.timezone("Europe/Moscow")
+    now = datetime.now(moscow_tz)
+
+    # Начинаем с начала следующего дня
+    start_date = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(
+        days=1
+    )
+    end_date = start_date + timedelta(days=14)
 
     # Получаем занятые слоты
     events_result = (
         service.events()
         .list(
-            calendarId=CALENDAR_ID,
-            timeMin=now.isoformat(),
+            calendarId="primary",  # Используем primary вместо CALENDAR_ID
+            timeMin=start_date.isoformat(),
             timeMax=end_date.isoformat(),
             singleEvents=True,
             orderBy="startTime",
@@ -318,10 +324,23 @@ def get_free_slots():
     for event in events:
         start = datetime.fromisoformat(
             event["start"].get("dateTime", event["start"].get("date"))
-        ).astimezone(pytz.UTC)
+        ).astimezone(moscow_tz)
         end = datetime.fromisoformat(
             event["end"].get("dateTime", event["end"].get("date"))
-        ).astimezone(pytz.UTC)
+        ).astimezone(moscow_tz)
+
+        # Пропускаем события, где вы не подтвердили участие
+        response_status = next(
+            (
+                attendee["responseStatus"]
+                for attendee in event.get("attendees", [])
+                if attendee.get("self", False)
+            ),
+            event.get("status", "confirmed"),  # Для событий, где вы организатор
+        )
+
+        if response_status == "declined":
+            continue
 
         # Добавляем все часовые слоты в период события
         current = start
@@ -331,33 +350,46 @@ def get_free_slots():
 
     # Создаем список всех возможных слотов
     all_slots = []
-    current = now.replace(hour=9, minute=0, second=0, microsecond=0)
-    if current < now:
-        current = current + timedelta(days=1)
+    current = start_date
 
     while current < end_date:
-        if (
-            current.hour >= 9 and current.hour < 18 and current.weekday() < 5
-        ):  # Рабочий день с 9 до 18
-            # Добавляем слот только если встреча закончится до 18:00
-            if current.hour < 17:  # Последняя встреча начинается в 17:00
-                all_slots.append(current)
-        current += timedelta(hours=1)
-        if current.hour >= 18:
-            current = (current + timedelta(days=1)).replace(hour=9, minute=0)
+        # Проверяем только рабочие дни (0 = понедельник, 4 = пятница)
+        if current.weekday() < 5:
+            # Добавляем слоты с 9:00 до 17:00 (последняя встреча в 17:00)
+            day_start = current.replace(hour=9, minute=0)
+            day_end = current.replace(hour=17, minute=0)
+
+            slot_time = day_start
+            while slot_time <= day_end:
+                all_slots.append(slot_time)
+                slot_time += timedelta(hours=1)
+
+        # Переходим к следующему дню
+        current = (current + timedelta(days=1)).replace(hour=0, minute=0)
 
     # Возвращаем словарь с информацией о статусе каждого слота
     slots_info = {}
     for slot in all_slots:
-        # Проверяем, не пересекается ли слот с уже занятыми
         slot_end = slot + timedelta(hours=1)
+
+        # Проверяем пересечения с занятыми слотами
         is_busy = any(
-            (busy <= slot < busy + timedelta(hours=1))
-            or (busy < slot_end <= busy + timedelta(hours=1))
-            or (slot <= busy < slot_end)
+            (
+                busy <= slot < busy + timedelta(hours=1)
+            )  # Начало слота попадает в занятый период
+            or (
+                busy < slot_end <= busy + timedelta(hours=1)
+            )  # Конец слота попадает в занятый период
+            or (slot <= busy < slot_end)  # Занятый период внутри слота
             for busy in busy_slots
         )
-        slots_info[slot] = {"is_busy": is_busy}
+
+        # Добавляем информацию о слоте
+        slots_info[slot] = {
+            "is_busy": is_busy,
+            "time": slot.strftime("%H:%M"),
+            "date": slot.strftime("%Y-%m-%d"),
+        }
 
     return slots_info
 
@@ -367,15 +399,43 @@ def send_email_notification(slot_time, booker_email):
     msg = MIMEMultipart()
     msg["From"] = GMAIL_SENDER
     msg["To"] = GMAIL_SENDER
-    msg["Subject"] = "Новая бронь встречи"
+    msg["Subject"] = "🗓️ Новая бронь встречи"
 
-    body = f"""
-    Новая бронь встречи:
-    Время: {slot_time}
-    Email участника: {booker_email}
+    # Создаем HTML версию письма
+    html_body = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #4dabf7;">Новая бронь встречи</h2>
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                <p><strong>📅 Дата и время:</strong> {slot_time}</p>
+                <p><strong>📧 Email участника:</strong> {booker_email}</p>
+                <p><strong>⏱️ Длительность:</strong> 1 час</p>
+            </div>
+            <p style="color: #666; font-size: 14px;">
+                Встреча автоматически добавлена в ваш Google Calendar.<br>
+                Участнику отправлено приглашение на указанный email.
+            </p>
+        </div>
+    </body>
+    </html>
     """
 
-    msg.attach(MIMEText(body, "plain"))
+    # Создаем текстовую версию для клиентов, не поддерживающих HTML
+    text_body = f"""
+    Новая бронь встречи
+    
+    Дата и время: {slot_time}
+    Email участника: {booker_email}
+    Длительность: 1 час
+    
+    Встреча автоматически добавлена в ваш Google Calendar.
+    Участнику отправлено приглашение на указанный email.
+    """
+
+    # Добавляем обе версии в письмо
+    msg.attach(MIMEText(text_body, "plain"))
+    msg.attach(MIMEText(html_body, "html"))
 
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
@@ -391,28 +451,45 @@ def create_calendar_event(slot_time, booker_email):
     """Создание события в календаре"""
     service = get_google_calendar_service()
 
+    # Убеждаемся, что используем московское время
+    moscow_tz = pytz.timezone("Europe/Moscow")
+    if slot_time.tzinfo != moscow_tz:
+        slot_time = slot_time.astimezone(moscow_tz)
+
     event = {
-        "summary": f"Встреча с {booker_email}",
-        "description": f"Встреча забронирована пользователем {booker_email}",
+        "summary": f"👥 Встреча с {booker_email}",
+        "description": f"""
+Встреча забронирована через систему бронирования.
+
+Участник: {booker_email}
+Длительность: 1 час
+
+Автоматически создано системой бронирования встреч.
+""",
         "start": {
             "dateTime": slot_time.isoformat(),
-            "timeZone": "UTC",
+            "timeZone": "Europe/Moscow",
         },
         "end": {
-            "dateTime": (
-                slot_time + timedelta(hours=1)
-            ).isoformat(),  # Изменено на 1 час
-            "timeZone": "UTC",
+            "dateTime": (slot_time + timedelta(hours=1)).isoformat(),
+            "timeZone": "Europe/Moscow",
         },
         "attendees": [
             {"email": booker_email},
             {"email": GMAIL_SENDER},
         ],
         "sendUpdates": "all",
+        "reminders": {
+            "useDefault": False,
+            "overrides": [
+                {"method": "email", "minutes": 60},
+                {"method": "popup", "minutes": 10},
+            ],
+        },
     }
 
     try:
-        event = service.events().insert(calendarId=CALENDAR_ID, body=event).execute()
+        event = service.events().insert(calendarId="primary", body=event).execute()
         return True
     except Exception as e:
         st.error(f"Ошибка при создании события: {str(e)}")
@@ -472,7 +549,7 @@ def main():
     # Группировка слотов по дням
     slots_by_day = {}
     for slot, info in slots_info.items():
-        day = slot.strftime("%Y-%m-%d")
+        day = info["date"]
         if day not in slots_by_day:
             slots_by_day[day] = []
         slots_by_day[day].append((slot, info))
@@ -500,12 +577,12 @@ def main():
             with cols[i % 6]:
                 if info["is_busy"]:
                     st.markdown(
-                        f'<button class="unavailable" disabled>{slot.strftime("%H:%M")}</button>',
+                        f'<button class="unavailable" disabled>{info["time"]}</button>',
                         unsafe_allow_html=True,
                     )
                 else:
                     if st.button(
-                        slot.strftime("%H:%M"),
+                        info["time"],
                         key=slot.isoformat(),
                         use_container_width=True,
                     ):
