@@ -399,22 +399,22 @@ def send_email_notification(slot_time, booker_email):
     msg = MIMEMultipart()
     msg["From"] = GMAIL_SENDER
     msg["To"] = GMAIL_SENDER
-    msg["Subject"] = "🗓️ Новая бронь встречи"
+    msg["Subject"] = "🗓️ New Meeting Booking"
 
     # Создаем HTML версию письма
     html_body = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333;">
         <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #4dabf7;">Новая бронь встречи</h2>
+            <h2 style="color: #4dabf7;">New Meeting Booking</h2>
             <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
-                <p><strong>📅 Дата и время:</strong> {slot_time}</p>
-                <p><strong>📧 Email участника:</strong> {booker_email}</p>
-                <p><strong>⏱️ Длительность:</strong> 1 час</p>
+                <p><strong>📅 Date and time:</strong> {slot_time}</p>
+                <p><strong>📧 Participant email:</strong> {booker_email}</p>
+                <p><strong>⏱️ Duration:</strong> 1 hour</p>
             </div>
             <p style="color: #666; font-size: 14px;">
-                Встреча автоматически добавлена в ваш Google Calendar.<br>
-                Участнику отправлено приглашение на указанный email.
+                The meeting has been automatically added to your Google Calendar.<br>
+                An invitation has been sent to the participant's email.
             </p>
         </div>
     </body>
@@ -423,14 +423,14 @@ def send_email_notification(slot_time, booker_email):
 
     # Создаем текстовую версию для клиентов, не поддерживающих HTML
     text_body = f"""
-    Новая бронь встречи
+    New Meeting Booking
     
-    Дата и время: {slot_time}
-    Email участника: {booker_email}
-    Длительность: 1 час
+    Date and time: {slot_time}
+    Participant email: {booker_email}
+    Duration: 1 hour
     
-    Встреча автоматически добавлена в ваш Google Calendar.
-    Участнику отправлено приглашение на указанный email.
+    The meeting has been automatically added to your Google Calendar.
+    An invitation has been sent to the participant's email.
     """
 
     # Добавляем обе версии в письмо
@@ -443,7 +443,7 @@ def send_email_notification(slot_time, booker_email):
             smtp.send_message(msg)
         return True
     except Exception as e:
-        st.error(f"Ошибка при отправке email: {str(e)}")
+        st.error(f"Error sending email: {str(e)}")
         return False
 
 
@@ -501,12 +501,12 @@ def main():
     st.markdown(
         """
         <div class="header-container">
-            <h1>СВОБОДНЫЕ СЛОТЫ</h1>
-            <div class="subtitle">БРАТКОВСКОГО ЕВГЕНИЯ</div>
+            <h1>AVAILABLE SLOTS</h1>
+            <div class="subtitle">BRATKOVSKY EVGENY</div>
             <div class="form-description" style="margin-top: 20px; text-align: center;">
-            Выберите удобное время для встречи. Длительность встречи - 1 час.<br>
-            Рабочий день: с 9:00 до 18:00 (последняя встреча в 17:00)<br>
-            После выбора времени вам нужно будет указать свой email для получения подтверждения.
+            Choose a convenient time for the meeting. Meeting duration - 1 hour.<br>
+            Working hours: 9:00 AM to 6:00 PM (last meeting at 5:00 PM)<br>
+            After selecting the time, you will need to enter your email to receive confirmation.
             </div>
         </div>
         """,
@@ -519,11 +519,11 @@ def main():
         <div class="slot-status">
             <div class="status-item">
                 <div class="status-dot available"></div>
-                Свободно
+                Available
             </div>
             <div class="status-item">
                 <div class="status-dot unavailable"></div>
-                Занято
+                Busy
             </div>
         </div>
         """,
@@ -561,11 +561,15 @@ def main():
     for day, slots in slots_by_day.items():
         date_obj = datetime.strptime(day, "%Y-%m-%d")
 
+        # Форматируем дату в соответствии с настройками (31/12/2025)
+        formatted_date = date_obj.strftime("%d/%m/%Y")
+        weekday = date_obj.strftime("%A")  # Полное название дня недели на английском
+
         # Создаем контейнер для даты
         st.markdown(
             f"""
             <div class="date-header">
-                <h3>{date_obj.strftime("%d %B %Y")} · {["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"][date_obj.weekday()]}</h3>
+                <h3>{formatted_date} · {weekday}</h3>
             </div>
         """,
             unsafe_allow_html=True,
@@ -593,21 +597,22 @@ def main():
 
     # Форма бронирования
     if "show_booking_form" in st.session_state and st.session_state.show_booking_form:
-        selected_time = st.session_state.selected_slot.strftime("%d %B %Y, %H:%M")
+        # Форматируем время в соответствии с настройками (31/12/2025, 13:00)
+        selected_time = st.session_state.selected_slot.strftime("%d/%m/%Y, %H:%M")
 
         st.markdown('<div class="booking-form">', unsafe_allow_html=True)
         st.markdown(
             f"""
-            <div class="form-header">📝 Бронирование встречи</div>
+            <div class="form-header">📝 Meeting Booking</div>
             <div class="form-description">
-            <b>Выбранное время:</b> {selected_time}<br>
-            <b>Длительность:</b> 1 час<br><br>
-            Для подтверждения бронирования, пожалуйста, введите ваш email адрес.<br>
-            На этот адрес будут отправлены:
+            <b>Selected time:</b> {selected_time}<br>
+            <b>Duration:</b> 1 hour<br><br>
+            To confirm the booking, please enter your email address.<br>
+            You will receive:
             <ul>
-                <li>Подтверждение бронирования</li>
-                <li>Ссылка для подключения к встрече</li>
-                <li>Напоминание за 1 час до встречи</li>
+                <li>Booking confirmation</li>
+                <li>Meeting link</li>
+                <li>Reminder 1 hour before the meeting</li>
             </ul>
             </div>
             """,
@@ -616,24 +621,24 @@ def main():
 
         with st.form("booking_form"):
             booker_email = st.text_input(
-                "📧 Ваш email адрес",
-                help="На этот адрес будет отправлено подтверждение бронирования и детали встречи",
+                "📧 Your email address",
+                help="You will receive booking confirmation and meeting details at this address",
             )
-            submitted = st.form_submit_button("✅ Подтвердить бронирование")
+            submitted = st.form_submit_button("✅ Confirm Booking")
 
             if submitted:
                 if not booker_email:
-                    st.error("Пожалуйста, введите ваш email адрес")
+                    st.error("Please enter your email address")
                 else:
                     if create_calendar_event(
                         st.session_state.selected_slot, booker_email
                     ):
                         if send_email_notification(
-                            st.session_state.selected_slot.strftime("%Y-%m-%d %H:%M"),
+                            st.session_state.selected_slot.strftime("%d/%m/%Y %H:%M"),
                             booker_email,
                         ):
                             st.success(
-                                "🎉 Встреча успешно забронирована! Проверьте вашу почту для получения деталей."
+                                "🎉 Meeting successfully booked! Check your email for details."
                             )
                         st.session_state.show_booking_form = False
                         st.rerun()
