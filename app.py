@@ -375,6 +375,14 @@ st.markdown(
         animation: pulse 1.5s infinite;
     }
 
+    .stButton > button.selected {
+        background: rgba(255, 165, 0, 0.4) !important;
+        border-color: rgba(255, 165, 0, 0.6) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 20px rgba(255, 165, 0, 0.4);
+        transform: translateY(-2px) scale(1.02);
+    }
+
     @keyframes pulse {
         0% {
             box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
@@ -1210,10 +1218,17 @@ def main():
                         unsafe_allow_html=True,
                     )
                 else:
+                    button_class = (
+                        "selected"
+                        if slot == st.session_state.get("selected_slot")
+                        else ""
+                    )
                     if st.button(
                         info["time"],
                         key=slot.isoformat(),
                         use_container_width=True,
+                        type="secondary",
+                        kwargs={"class": button_class},
                     ):
                         st.session_state.selected_slot = slot
                         st.session_state.show_booking_form = True
