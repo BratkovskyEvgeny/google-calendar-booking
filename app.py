@@ -395,70 +395,84 @@ def get_free_slots():
 
 
 def send_email_notification(slot_time, booker_email):
-    """Отправка уведомления на email владельца"""
-    msg = MIMEMultipart()
-    msg["From"] = GMAIL_SENDER
-    msg["To"] = GMAIL_SENDER
-    msg["Subject"] = "🗓️ New Meeting Request"
-
-    # Создаем HTML версию письма с более подробной информацией
-    html_body = f"""
-    <html>
-    <body style="font-family: Arial, sans-serif; color: #333;">
-        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #4dabf7;">New Meeting Request</h2>
-            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
-                <p><strong>📅 Date and time:</strong> {slot_time}</p>
-                <p><strong>📧 Participant email:</strong> {booker_email}</p>
-                <p><strong>⏱️ Duration:</strong> 1 hour</p>
-            </div>
-            <div style="background-color: #e9ecef; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                <p style="margin: 0; color: #495057;"><strong>What happens next:</strong></p>
-                <ul style="color: #495057; margin: 10px 0;">
-                    <li>The meeting has been added to your Google Calendar</li>
-                    <li>You will receive a Google Calendar invitation</li>
-                    <li>You will get an email reminder 1 hour before the meeting</li>
-                    <li>You will see a popup notification 10 minutes before the meeting</li>
-                </ul>
-            </div>
-            <div style="background-color: #e7f5ff; padding: 15px; border-radius: 5px;">
-                <p style="margin: 0; color: #1971c2;"><strong>Need to reschedule?</strong><br>
-                You can accept, decline, or propose a new time directly in Google Calendar.</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-
-    # Создаем текстовую версию для клиентов, не поддерживающих HTML
-    text_body = f"""
-    New Meeting Request
-
-    📅 Date and time: {slot_time}
-    📧 Participant email: {booker_email}
-    ⏱️ Duration: 1 hour
-
-    What happens next:
-    - The meeting has been added to your Google Calendar
-    - You will receive a Google Calendar invitation
-    - You will get an email reminder 1 hour before the meeting
-    - You will see a popup notification 10 minutes before the meeting
-
-    Need to reschedule?
-    You can accept, decline, or propose a new time directly in Google Calendar.
-    """
-
-    # Добавляем обе версии в письмо
-    msg.attach(MIMEText(text_body, "plain"))
-    msg.attach(MIMEText(html_body, "html"))
-
+    """Отправка уведомления на email"""
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-            smtp.login(GMAIL_SENDER, GMAIL_APP_PASSWORD)
-            smtp.send_message(msg)
+        # Создаем основное сообщение
+        msg = MIMEMultipart("alternative")
+        msg["From"] = GMAIL_SENDER
+        msg["To"] = booker_email  # Отправляем на email бронирующего
+        msg["Subject"] = "🎉 Встреча успешно забронирована!"
+
+        # HTML версия письма
+        html_body = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+            <div style="padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                <h2 style="color: #1e88e5; margin-bottom: 20px;">Подтверждение бронирования</h2>
+                
+                <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="color: #333; margin-top: 0;">Детали встречи:</h3>
+                    <p><strong>📅 Дата и время:</strong> {slot_time}</p>
+                    <p><strong>⏱️ Продолжительность:</strong> 1 час</p>
+                    <p><strong>👥 Участники:</strong> {booker_email}</p>
+                </div>
+                
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="color: #1e88e5; margin-top: 0;">Что дальше?</h4>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li>Вы получите приглашение в Google Calendar</li>
+                        <li>В приглашении будет ссылка на Google Meet</li>
+                        <li>За час до встречи придет напоминание</li>
+                        <li>За 10 минут появится уведомление</li>
+                    </ul>
+                </div>
+                
+                <div style="background: #f5f5f5; padding: 15px; border-radius: 8px;">
+                    <p style="margin: 0;"><strong>Нужно перенести встречу?</strong><br>
+                    Вы можете предложить другое время через Google Calendar.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+        # Текстовая версия
+        text_body = f"""
+        🎉 Встреча успешно забронирована!
+
+        📅 Дата и время: {slot_time}
+        ⏱️ Продолжительность: 1 час
+        👥 Участники: {booker_email}
+
+        Что дальше?
+        - Вы получите приглашение в Google Calendar
+        - В приглашении будет ссылка на Google Meet
+        - За час до встречи придет напоминание
+        - За 10 минут появится уведомление
+
+        Нужно перенести встречу?
+        Вы можете предложить другое время через Google Calendar.
+        """
+
+        # Добавляем обе версии в письмо
+        msg.attach(MIMEText(text_body, "plain"))
+        msg.attach(MIMEText(html_body, "html"))
+
+        # Отправляем письмо
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(GMAIL_SENDER, GMAIL_APP_PASSWORD)
+            # Отправляем копию организатору
+            msg_copy = msg.copy()
+            msg_copy["To"] = GMAIL_SENDER
+            msg_copy["Subject"] = f"📋 Новая встреча: {booker_email}"
+            server.send_message(msg_copy)
+
+            # Отправляем основное письмо участнику
+            server.send_message(msg)
+
         return True
     except Exception as e:
-        st.error(f"Error sending email: {str(e)}")
+        st.error(f"Ошибка отправки email: {str(e)}")
         return False
 
 
@@ -846,7 +860,7 @@ def main():
             <div class="form-description">
             <b>Selected time:</b> {selected_time}<br>
             <b>Duration:</b> 1 hour<br><br>
-            To confirm the booking, please enter your email address.<br>
+            To confirm the booking, please enter email address zhenyabratkovski5@gmail.com.<br>
             You will receive:
             <ul>
                 <li>Booking confirmation</li>
