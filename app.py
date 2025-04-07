@@ -11,16 +11,17 @@ from dotenv import load_dotenv
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
-from googleapiclient.discovery import build
 
 # Загрузка переменных окружения
 load_dotenv()
 
-# Настройки
+# Настройки из Streamlit secrets
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
-CALENDAR_ID = os.getenv("CALENDAR_ID", "primary")
-GMAIL_SENDER = os.getenv("GMAIL_SENDER", "zhenyabratkovski5@gmail.com")
-GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
+CALENDAR_ID = st.secrets["calendar_id"]
+GMAIL_SENDER = st.secrets["gmail_sender"]
+GMAIL_APP_PASSWORD = st.secrets["gmail_app_password"]
+CLIENT_ID = st.secrets["google_client_id"]
+CLIENT_SECRET = st.secrets["google_client_secret"]
 
 
 def get_google_calendar_service():
@@ -34,8 +35,20 @@ def get_google_calendar_service():
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+            # Создаем credentials.json на лету из secrets
+            client_config = {
+                "installed": {
+                    "client_id": CLIENT_ID,
+                    "client_secret": CLIENT_SECRET,
+                    "redirect_uris": ["http://localhost", "urn:ietf:wg:oauth:2.0:oob"],
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                }
+            }
+
+            flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
             creds = flow.run_local_server(port=0)
+
         with open("token.pickle", "wb") as token:
             pickle.dump(creds, token)
 

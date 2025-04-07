@@ -34,4 +34,5 @@ ENV/
 # Project specific
 .env
 credentials.json
-token.pickle 
+token.pickle
+.streamlit/secrets.toml 
