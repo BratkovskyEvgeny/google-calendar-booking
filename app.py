@@ -1507,6 +1507,77 @@ def main():
                 После выбора времени вам нужно будет ввести email для получения подтверждения.
             </div>
         </div>
+
+        <!-- Скрипт для автоматического обновления страницы -->
+        <script>
+            function getMillisecondsUntilMidnight() {
+                const now = new Date();
+                const midnight = new Date(now);
+                midnight.setHours(24, 0, 0, 0);
+                return midnight - now;
+            }
+
+            function scheduleRefresh() {
+                const msUntilMidnight = getMillisecondsUntilMidnight();
+                setTimeout(function() {
+                    // Обновляем страницу
+                    window.location.reload();
+                    // После обновления снова планируем следующее обновление
+                    scheduleRefresh();
+                }, msUntilMidnight);
+            }
+
+            // Запускаем планировщик обновлений
+            scheduleRefresh();
+
+            // Добавляем индикатор следующего обновления
+            function updateNextRefreshTime() {
+                const msUntilMidnight = getMillisecondsUntilMidnight();
+                const hoursLeft = Math.floor(msUntilMidnight / (1000 * 60 * 60));
+                const minutesLeft = Math.floor((msUntilMidnight % (1000 * 60 * 60)) / (1000 * 60));
+                
+                const refreshInfo = document.getElementById('next-refresh-info');
+                if (refreshInfo) {
+                    refreshInfo.textContent = `Следующее обновление через: ${hoursLeft}ч ${minutesLeft}м`;
+                }
+                
+                // Обновляем каждую минуту
+                setTimeout(updateNextRefreshTime, 60000);
+            }
+
+            // Создаем элемент для отображения времени до следующего обновления
+            document.addEventListener('DOMContentLoaded', function() {
+                const refreshInfo = document.createElement('div');
+                refreshInfo.id = 'next-refresh-info';
+                refreshInfo.className = 'refresh-info';
+                document.querySelector('.header-container').appendChild(refreshInfo);
+                updateNextRefreshTime();
+            });
+        </script>
+
+        <style>
+        /* Добавляем стили для индикатора обновления */
+        .refresh-info {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 1rem;
+            text-align: center;
+            font-style: italic;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .refresh-info:hover {
+            opacity: 1;
+        }
+
+        @media screen and (max-width: 768px) {
+            .refresh-info {
+                font-size: 0.8rem;
+                margin-top: 0.8rem;
+            }
+        }
+        </style>
         """,
         unsafe_allow_html=True,
     )
