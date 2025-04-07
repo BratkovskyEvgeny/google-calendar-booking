@@ -269,20 +269,14 @@ st.markdown(
     }
     .slot-status {
         display: flex;
-        justify-content: center;
         gap: 20px;
         margin: 20px 0;
-        padding: 10px;
-        background-color: #2b2b2b;
-        border-radius: 4px;
-        border: 1px solid #3c3f41;
+        justify-content: center;
     }
     .status-item {
         display: flex;
         align-items: center;
         gap: 8px;
-        color: #a9b7c6;
-        font-size: 0.9rem;
     }
     .status-dot {
         width: 12px;
@@ -290,10 +284,11 @@ st.markdown(
         border-radius: 50%;
     }
     .status-dot.available {
-        background-color: #4dabf7;
+        background: rgba(43, 43, 43, 0.7);
+        border: 1px solid rgba(255, 215, 0, 0.1);
     }
     .status-dot.unavailable {
-        background-color: #ff6b6b;
+        background: linear-gradient(145deg, #dc3545, #c82333);
     }
     /* Стили для контейнера сообщений */
     .messages-container {
