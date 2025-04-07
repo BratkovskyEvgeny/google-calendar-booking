@@ -738,122 +738,70 @@ st.markdown(
     /* Медиа-запросы для мобильных устройств */
     @media screen and (max-width: 768px) {
         .header-container {
-            padding: 2rem 1rem;
+            padding: 2rem 0.8rem;
             margin-bottom: 2rem;
             border-radius: 16px;
         }
         
         .header-container h1 {
-            font-size: 1.8rem;
-            letter-spacing: 1px;
+            font-size: 1.6rem;
+            letter-spacing: 0.5px;
             margin-bottom: 0.5rem;
-            line-height: 1.3;
-        }
-        
-        .subtitle {
-            font-size: 1.1rem;
-            letter-spacing: 2px;
-            margin: 0.8rem 0;
-        }
-        
-        .form-description {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            margin: 1.5rem 0 0;
+            line-height: 1.4;
             padding: 0 0.5rem;
         }
 
-        /* Адаптация кнопок слотов для мобильных устройств */
-        .slot-button {
-            width: 100% !important;
-            margin: 0.5rem 0 !important;
-            padding: 0.8rem !important;
-            font-size: 0.9rem !important;
-        }
-
-        /* Адаптация формы для мобильных устройств */
-        .stTextInput, .stButton {
-            width: 100% !important;
-            max-width: none !important;
-        }
-
-        input[type="text"], input[type="email"] {
-            font-size: 1rem !important;
-            padding: 0.5rem !important;
-        }
-
-        .stButton > button {
-            width: 100% !important;
-            padding: 0.5rem 1rem !important;
-            font-size: 1rem !important;
-        }
-    }
-
-    /* Медиа-запросы для маленьких мобильных устройств */
-    @media screen and (max-width: 480px) {
-        .header-container {
-            padding: 1.5rem 0.8rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .header-container h1 {
-            font-size: 1.5rem;
-            letter-spacing: 0.5px;
+        .mobile-break {
+            display: block;
         }
         
         .subtitle {
             font-size: 1rem;
             letter-spacing: 1.5px;
+            margin: 0.8rem 0;
+            line-height: 1.4;
+            padding: 0 0.5rem;
         }
         
         .form-description {
             font-size: 0.9rem;
             line-height: 1.5;
             margin: 1.2rem 0 0;
-        }
-
-        /* Дополнительные стили для очень маленьких экранов */
-        .stMarkdown {
-            font-size: 0.9rem !important;
-        }
-
-        .stSelectbox {
-            max-width: 100% !important;
-        }
-
-        /* Улучшение читаемости на маленьких экранах */
-        .form-description br {
-            display: none;
-        }
-        
-        .form-description {
-            text-align: left;
+            padding: 0 0.8rem;
         }
     }
 
-    /* Оптимизация для планшетов */
-    @media screen and (min-width: 769px) and (max-width: 1024px) {
+    /* Медиа-запросы для маленьких мобильных устройств */
+    @media screen and (max-width: 480px) {
         .header-container {
-            padding: 2.5rem 1.2rem;
+            padding: 1.5rem 0.6rem;
+            margin-bottom: 1.5rem;
         }
         
         .header-container h1 {
-            font-size: 2rem;
+            font-size: 1.4rem;
+            letter-spacing: 0.3px;
+            padding: 0 0.3rem;
         }
         
         .subtitle {
-            font-size: 1.2rem;
+            font-size: 0.9rem;
+            letter-spacing: 1.2px;
+            padding: 0 0.3rem;
         }
         
         .form-description {
-            font-size: 1rem;
-            max-width: 90%;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin: 1rem 0 0;
+            padding: 0 0.5rem;
         }
+    }
 
-        /* Адаптация сетки слотов для планшетов */
-        .slot-button {
-            width: calc(50% - 1rem) !important;
-            margin: 0.5rem !important;
+    /* Для десктопов скрываем переносы строк */
+    @media screen and (min-width: 769px) {
+        .mobile-break {
+            display: none;
         }
     }
 </style>
@@ -1522,8 +1470,8 @@ def main():
     st.markdown(
         """
         <div class="header-container">
-            <h1>АССИСТЕНТ ПО ПЛАНИРОВАНИЮ ВСТРЕЧ</h1>
-            <div class="subtitle">БРАТКОВСКИЙ ЕВГЕНИЙ ВИКТОРОВИЧ</div>
+            <h1>АССИСТЕНТ<br class="mobile-break"> ПО ПЛАНИРОВАНИЮ<br class="mobile-break"> ВСТРЕЧ</h1>
+            <div class="subtitle">БРАТКОВСКИЙ<br class="mobile-break">ЕВГЕНИЙ ВИКТОРОВИЧ</div>
             <div class="form-description">
                 Выберите удобное время для встречи. Продолжительность встречи - 1 час.<br>
                 Рабочие часы: с 9:00 до 18:00 (последняя встреча в 17:00)<br>
