@@ -369,21 +369,21 @@ st.markdown(
 
     .slot-button:hover {
         transform: translateY(-2px) scale(1.02);
-        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
-        background: rgba(255, 215, 0, 0.1);
-        border-color: rgba(255, 215, 0, 0.4);
+        box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
+        background: rgba(255, 165, 0, 0.2);
+        border-color: rgba(255, 165, 0, 0.4);
         animation: pulse 1.5s infinite;
     }
 
     @keyframes pulse {
         0% {
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
         }
         50% {
-            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+            box-shadow: 0 4px 20px rgba(255, 165, 0, 0.4);
         }
         100% {
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
         }
     }
 
@@ -397,7 +397,7 @@ st.markdown(
         background: linear-gradient(
             90deg,
             transparent,
-            rgba(255, 215, 0, 0.2),
+            rgba(255, 165, 0, 0.2),
             transparent
         );
         transition: 0.5s;
