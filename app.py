@@ -450,39 +450,87 @@ st.markdown(
     /* Улучшенный заголовок */
     .header-container {
         text-align: center;
-        padding: 2rem 1rem;
-        margin-bottom: 1.5rem;
-        background: rgba(43, 43, 43, 0.8);
-        border-radius: 16px;
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 215, 0, 0.1);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        transform: translateY(0);
+        padding: 3rem 1.5rem;
+        margin-bottom: 2.5rem;
+        background: rgba(43, 43, 43, 0.9);
+        border-radius: 20px;
+        backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 215, 0, 0.2);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: fadeInDown 1s ease-out;
     }
-
+    
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
     .header-container:hover {
-        transform: translateY(-5px);
-        border-color: rgba(255, 215, 0, 0.3);
-        box-shadow: 0 12px 40px rgba(255, 215, 0, 0.1);
+        border-color: rgba(255, 215, 0, 0.4);
+        box-shadow: 0 15px 50px rgba(255, 215, 0, 0.2);
+        transform: translateY(-8px);
     }
-
+    
     .header-container h1 {
         font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        background: linear-gradient(45deg, #ffd700, #ffb700, #ffd700);
+        font-weight: 900;
+        margin-bottom: 0.8rem;
+        background: linear-gradient(120deg, 
+            #ffd700 0%, 
+            #ffc107 25%, 
+            #ffab00 50%,
+            #ffd700 75%,
+            #ffc107 100%);
         background-size: 200% auto;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
+        letter-spacing: 2px;
+        line-height: 1.4;
         animation: shine 3s linear infinite;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     }
-
+    
     @keyframes shine {
         to {
             background-position: 200% center;
         }
+    }
+    
+    .subtitle {
+        font-size: 1.4rem;
+        margin: 1.2rem 0;
+        letter-spacing: 3px;
+        font-weight: 600;
+        text-transform: uppercase;
+        background: linear-gradient(120deg, 
+            #ffffff 0%, 
+            #e0e0e0 50%,
+            #ffffff 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        opacity: 0.95;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        animation: shine 4s linear infinite;
+    }
+    
+    .form-description {
+        color: #e0e0e0;
+        line-height: 1.8;
+        font-size: 1.1rem;
+        margin: 2rem 0 0;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+        opacity: 0.9;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
     }
 
     /* Улучшенные кнопки слотов */
@@ -1148,44 +1196,56 @@ def main():
         /* Заголовок */
         .header-container {
             text-align: center;
-            padding: 1.5rem 1rem;
-            margin-bottom: 1rem;
-            background: rgba(43, 43, 43, 0.7);
-            border-radius: 8px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 215, 0, 0.1);
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.05);
-            transition: all 0.3s ease;
+            padding: 2.5rem 1rem;
+            margin-bottom: 2rem;
+            background: rgba(43, 43, 43, 0.8);
+            border-radius: 16px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s ease;
         }
         
         .header-container:hover {
-            border-color: rgba(255, 215, 0, 0.2);
-            box-shadow: 0 6px 16px rgba(255, 215, 0, 0.08);
+            border-color: rgba(255, 215, 0, 0.3);
+            box-shadow: 0 12px 40px rgba(255, 215, 0, 0.15);
+            transform: translateY(-5px);
         }
         
         .header-container h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-            background: linear-gradient(45deg, #ffd700 0%, #ffb700 100%);
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(120deg, #ffd700 0%, #ffc107 50%, #ffab00 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 1px;
+            line-height: 1.3;
         }
         
         .subtitle {
-            font-size: 1rem;
-            color: #ffd700;
-            margin-bottom: 1rem;
-            letter-spacing: 1px;
-            opacity: 0.8;
+            font-size: 1.3rem;
+            color: #e0e0e0;
+            margin: 1rem 0;
+            letter-spacing: 2px;
+            font-weight: 500;
+            text-transform: uppercase;
+            background: linear-gradient(120deg, #ffffff 0%, #e0e0e0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
         }
         
         .form-description {
             color: #d4d4d4;
-            line-height: 1.4;
-            font-size: 0.9rem;
-            margin: 0;
+            line-height: 1.6;
+            font-size: 1rem;
+            margin: 1.5rem 0 0;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         /* Статус слотов */
@@ -1325,8 +1385,8 @@ def main():
     st.markdown(
         """
         <div class="header-container">
-            <h1>ПЛАНИРОВЩИК ВСТРЕЧ</h1>
-            <div class="subtitle">БРАТКОВСКИЙ ЕВГЕНИЙ</div>
+            <h1>АССИСТЕНТ ПО ПЛАНИРОВАНИЮ ВСТРЕЧ</h1>
+            <div class="subtitle">БРАТКОВСКИЙ ЕВГЕНИЙ ВИКТОРОВИЧ</div>
             <div class="form-description">
                 Выберите удобное время для встречи. Продолжительность встречи - 1 час.<br>
                 Рабочие часы: с 9:00 до 18:00 (последняя встреча в 17:00)<br>
@@ -1438,7 +1498,7 @@ def main():
             <div class="form-description">
             <b>Выбранное время:</b> {selected_time}<br>
             <b>Продолжительность:</b> 1 час<br><br>
-            Для подтверждения бронирования, пожалуйста, введите email адрес zhenyabratkovski5@gmail.com.<br>
+            Для подтверждения бронирования, пожалуйста, введите ваш email-адрес.<br>
             Вы получите:
             <ul>
                 <li>Подтверждение бронирования</li>
