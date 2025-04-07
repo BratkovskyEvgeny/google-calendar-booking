@@ -1,4 +1,5 @@
 import logging
+import os
 import smtplib
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
@@ -11,13 +12,39 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
+# Создаем директорию для логов, если её нет
+logs_dir = os.path.join(os.getcwd(), "logs")
+if not os.path.exists(logs_dir):
+    os.makedirs(logs_dir)
+
+# Полный путь к файлу логов
+log_file = os.path.join(logs_dir, "email_logs.txt")
+
 # Настройка логирования
 logging.basicConfig(
-    filename="email_logs.txt",
+    filename=log_file,
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     encoding="utf-8",
 )
+
+# Выводим информацию о расположении файла логов
+st.sidebar.markdown("### Информация о логах")
+st.sidebar.info(f"Файл логов: {log_file}")
+
+# Добавляем кнопку для просмотра логов
+if st.sidebar.button("Показать логи"):
+    try:
+        with open(log_file, "r", encoding="utf-8") as f:
+            logs = f.read()
+            if logs:
+                st.sidebar.code(logs)
+            else:
+                st.sidebar.info("Файл логов пуст")
+    except FileNotFoundError:
+        st.sidebar.error("Файл логов не найден")
+    except Exception as e:
+        st.sidebar.error(f"Ошибка при чтении логов: {str(e)}")
 
 
 # Функция для логирования
