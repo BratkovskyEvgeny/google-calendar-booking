@@ -376,7 +376,7 @@ st.markdown(
     }
 
     /* Стиль для выбранного слота */
-    .stButton > button[data-selected="true"] {
+    .stButton > button[aria-pressed="true"] {
         background: rgba(255, 165, 0, 0.4) !important;
         border-color: rgba(255, 165, 0, 0.6) !important;
         color: #ffffff !important;
@@ -1172,11 +1172,6 @@ def main():
                         unsafe_allow_html=True,
                     )
                 else:
-                    is_selected = slot == st.session_state.get("selected_slot")
-                    st.markdown(
-                        f'<button data-selected="{str(is_selected).lower()}" onclick="document.getElementById(\'slot_{slot.isoformat()}\').click()">{info["time"]}</button>',
-                        unsafe_allow_html=True,
-                    )
                     if st.button(
                         info["time"],
                         key=f"slot_{slot.isoformat()}",
