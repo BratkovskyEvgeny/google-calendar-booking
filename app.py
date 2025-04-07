@@ -363,13 +363,48 @@ st.markdown(
         background: rgba(43, 43, 43, 0.7);
         border: 1px solid rgba(255, 215, 0, 0.1);
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        position: relative;
+        overflow: hidden;
     }
 
     .slot-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
         background: rgba(43, 43, 43, 0.9);
-        border-color: rgba(255, 215, 0, 0.2);
+        border-color: rgba(255, 215, 0, 0.3);
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+        }
+        50% {
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
+        }
+        100% {
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+        }
+    }
+
+    .slot-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 215, 0, 0.1),
+            transparent
+        );
+        transition: 0.5s;
+    }
+
+    .slot-button:hover::before {
+        left: 100%;
     }
 
     .slot-button.unavailable {
@@ -382,6 +417,11 @@ st.markdown(
         transform: none;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         background: linear-gradient(145deg, #dc3545, #c82333) !important;
+        animation: none;
+    }
+
+    .slot-button.unavailable::before {
+        display: none;
     }
 
     /* Стили для индикаторов статуса */
