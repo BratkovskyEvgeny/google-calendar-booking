@@ -295,6 +295,67 @@ st.markdown(
         animation: none !important;
         transition: opacity 0.5s ease !important;
     }
+
+    /* Стили для слотов */
+    .slot-button {
+        width: 100%;
+        padding: 10px;
+        margin: 5px 0;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        text-align: center;
+        color: white;
+        background: linear-gradient(145deg, #32a852, #2d9649);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .slot-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        background: linear-gradient(145deg, #37bc5c, #32a852);
+    }
+
+    .slot-button.unavailable {
+        background: linear-gradient(145deg, #dc3545, #c82333);
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    .slot-button.unavailable:hover {
+        transform: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Стили для индикаторов статуса */
+    .slot-status {
+        display: flex;
+        gap: 20px;
+        margin: 20px 0;
+        justify-content: center;
+    }
+
+    .status-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+
+    .status-dot.available {
+        background: linear-gradient(145deg, #32a852, #2d9649);
+    }
+
+    .status-dot.unavailable {
+        background: linear-gradient(145deg, #dc3545, #c82333);
+    }
 </style>
 """,
     unsafe_allow_html=True,
