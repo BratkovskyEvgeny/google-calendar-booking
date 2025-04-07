@@ -1,5 +1,3 @@
-import os
-import pickle
 import smtplib
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
@@ -9,7 +7,7 @@ import pytz
 import streamlit as st
 from dotenv import load_dotenv
 from google.auth.transport.requests import Request
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
 # Загрузка переменных окружения
@@ -26,33 +24,26 @@ CLIENT_SECRET = st.secrets["google_client_secret"]
 
 def get_google_calendar_service():
     """Получение сервиса Google Calendar"""
-    creds = None
-    if os.path.exists("token.pickle"):
-        with open("token.pickle", "rb") as token:
-            creds = pickle.load(token)
+    try:
+        # Создаем учетные данные напрямую из secrets
+        creds = Credentials(
+            None,  # No token yet
+            refresh_token=st.secrets.get("google_refresh_token"),
+            token_uri="https://oauth2.googleapis.com/token",
+            client_id=st.secrets["google_client_id"],
+            client_secret=st.secrets["google_client_secret"],
+            scopes=SCOPES,
+        )
 
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            # Создаем credentials.json на лету из secrets
-            client_config = {
-                "installed": {
-                    "client_id": CLIENT_ID,
-                    "client_secret": CLIENT_SECRET,
-                    "redirect_uris": ["http://localhost", "urn:ietf:wg:oauth:2.0:oob"],
-                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                    "token_uri": "https://oauth2.googleapis.com/token",
-                }
-            }
+        # Обновляем токен
+        creds.refresh(Request())
 
-            flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
-            creds = flow.run_local_server(port=0)
-
-        with open("token.pickle", "wb") as token:
-            pickle.dump(creds, token)
-
-    return build("calendar", "v3", credentials=creds)
+        # Создаем и возвращаем сервис
+        return build("calendar", "v3", credentials=creds)
+    except Exception as e:
+        st.error(f"Ошибка аутентификации: {str(e)}")
+        st.error("Проверьте настройки OAuth и refresh token в секретах Streamlit.")
+        st.stop()
 
 
 def get_free_slots():
@@ -172,6 +163,11 @@ def create_calendar_event(slot_time, booker_email):
 
 def main():
     st.title("Система бронирования встреч")
+
+    # Проверяем наличие refresh_token
+    if not st.secrets.get("google_refresh_token"):
+        st.error("Необходимо настроить OAuth. Пожалуйста, свяжитесь с администратором.")
+        st.stop()
 
     # Получение свободных слотов
     try:
