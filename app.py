@@ -243,6 +243,58 @@ st.markdown(
     .status-dot.unavailable {
         background-color: #ff6b6b;
     }
+    /* Стили для контейнера сообщений */
+    .messages-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 300px;
+        z-index: 9999;
+        background: rgba(43, 43, 43, 0.95);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 215, 0, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 10px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .message {
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .message.info {
+        background: rgba(13, 110, 253, 0.2);
+        border: 1px solid rgba(13, 110, 253, 0.3);
+        color: #8bb9fe;
+    }
+
+    .message.success {
+        background: rgba(25, 135, 84, 0.2);
+        border: 1px solid rgba(25, 135, 84, 0.3);
+        color: #75b798;
+    }
+
+    .message.error {
+        background: rgba(220, 53, 69, 0.2);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+        color: #ea868f;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Увеличиваем время отображения стандартных уведомлений */
+    div[data-testid="stNotificationContent"] {
+        animation: none !important;
+        transition: opacity 0.5s ease !important;
+    }
 </style>
 """,
     unsafe_allow_html=True,
@@ -271,9 +323,9 @@ GMAIL_APP_PASSWORD = " ".join(
 CLIENT_ID = st.secrets["google_client_id"]
 CLIENT_SECRET = st.secrets["google_client_secret"]
 
-# Добавляем отладочную информацию
-st.write(f"Email отправителя: {GMAIL_SENDER}")
-st.write(f"Длина пароля приложения: {len(GMAIL_APP_PASSWORD)}")
+# Удаляем отладочную информацию
+# st.write(f"Email отправителя: {GMAIL_SENDER}")
+# st.write(f"Длина пароля приложения: {len(GMAIL_APP_PASSWORD)}")
 
 
 def get_google_calendar_service():
@@ -409,15 +461,24 @@ def send_email_notification(slot_time, booker_email):
     try:
         # Проверяем наличие необходимых настроек
         if not GMAIL_SENDER:
+            st.session_state.messages.append(
+                ("error", "Ошибка: Не указан email отправителя в настройках")
+            )
             st.error("Ошибка: Не указан email отправителя (GMAIL_SENDER) в настройках")
             return False
 
         if not GMAIL_APP_PASSWORD:
+            st.session_state.messages.append(
+                ("error", "Ошибка: Не указан пароль приложения Gmail в настройках")
+            )
             st.error(
                 "Ошибка: Не указан пароль приложения Gmail (GMAIL_APP_PASSWORD) в настройках"
             )
             return False
 
+        st.session_state.messages.append(
+            ("info", f"Подготовка к отправке email на адрес: {booker_email}")
+        )
         st.info(f"Подготовка к отправке email на адрес: {booker_email}")
 
         # Создаем основное сообщение
@@ -530,18 +591,18 @@ def create_calendar_event(slot_time, booker_email):
         slot_time = slot_time.astimezone(moscow_tz)
 
     event = {
-        "summary": f"👥 Meeting with {booker_email}",
+        "summary": f"👥 Встреча с {booker_email}",
         "description": f"""
-Meeting Request Details:
+Детали встречи:
 
-👤 Participant: {booker_email}
-⏱️ Duration: 1 hour
-📍 Location: Google Meet (link will be generated automatically)
+👤 Участник: {booker_email}
+⏱️ Продолжительность: 1 час
+📍 Место: Google Meet (ссылка будет сгенерирована автоматически)
 
-This meeting was booked through the Meeting Scheduler system.
-You can accept, decline, or propose a new time using the options above.
+Эта встреча была забронирована через систему планирования встреч.
+Вы можете принять, отклонить или предложить другое время, используя опции выше.
 
-Need to contact the participant? Reply to this invitation or use their email: {booker_email}
+Нужно связаться с участником? Ответьте на это приглашение или используйте email: {booker_email}
 """,
         "start": {
             "dateTime": slot_time.isoformat(),
@@ -595,6 +656,79 @@ def main():
     # Инициализация состояния для отображения дополнительных дней
     if "show_all_days" not in st.session_state:
         st.session_state.show_all_days = False
+
+    # Инициализация состояния для сообщений
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    # Добавляем стили для сообщений
+    st.markdown(
+        """
+        <style>
+        /* Стили для контейнера сообщений */
+        .messages-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            z-index: 9999;
+            background: rgba(43, 43, 43, 0.95);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 10px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .message.info {
+            background: rgba(13, 110, 253, 0.2);
+            border: 1px solid rgba(13, 110, 253, 0.3);
+            color: #8bb9fe;
+        }
+
+        .message.success {
+            background: rgba(25, 135, 84, 0.2);
+            border: 1px solid rgba(25, 135, 84, 0.3);
+            color: #75b798;
+        }
+
+        .message.error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            color: #ea868f;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Увеличиваем время отображения стандартных уведомлений */
+        div[data-testid="stNotificationContent"] {
+            animation: none !important;
+            transition: opacity 0.5s ease !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Отображаем контейнер с сообщениями
+    if st.session_state.messages:
+        messages_html = '<div class="messages-container">'
+        for msg_type, msg_text in st.session_state.messages:
+            messages_html += f'<div class="message {msg_type}">{msg_text}</div>'
+        messages_html += "</div>"
+        st.markdown(messages_html, unsafe_allow_html=True)
 
     # Настраиваем стили
     st.markdown(
@@ -792,12 +926,12 @@ def main():
     st.markdown(
         """
         <div class="header-container">
-            <h1>MEETING SCHEDULER</h1>
-            <div class="subtitle">BRATKOVSKY EVGENY</div>
+            <h1>ПЛАНИРОВЩИК ВСТРЕЧ</h1>
+            <div class="subtitle">БРАТКОВСКИЙ ЕВГЕНИЙ</div>
             <div class="form-description">
-                Choose a convenient time for the meeting. Meeting duration - 1 hour.<br>
-                Working hours: 9:00 AM to 6:00 PM (last meeting at 5:00 PM)<br>
-                After selecting the time, you will need to enter your email to receive confirmation.
+                Выберите удобное время для встречи. Продолжительность встречи - 1 час.<br>
+                Рабочие часы: с 9:00 до 18:00 (последняя встреча в 17:00)<br>
+                После выбора времени вам нужно будет ввести email для получения подтверждения.
             </div>
         </div>
         """,
@@ -810,11 +944,11 @@ def main():
         <div class="slot-status">
             <div class="status-item">
                 <div class="status-dot available"></div>
-                Available
+                Доступно
             </div>
             <div class="status-item">
                 <div class="status-dot unavailable"></div>
-                Busy
+                Занято
             </div>
         </div>
         """,
@@ -900,16 +1034,16 @@ def main():
         st.markdown('<div class="booking-form">', unsafe_allow_html=True)
         st.markdown(
             f"""
-            <div class="form-header">📝 Meeting Booking</div>
+            <div class="form-header">📝 Бронирование встречи</div>
             <div class="form-description">
-            <b>Selected time:</b> {selected_time}<br>
-            <b>Duration:</b> 1 hour<br><br>
-            To confirm the booking, please enter email address zhenyabratkovski5@gmail.com.<br>
-            You will receive:
+            <b>Выбранное время:</b> {selected_time}<br>
+            <b>Продолжительность:</b> 1 час<br><br>
+            Для подтверждения бронирования, пожалуйста, введите email адрес zhenyabratkovski5@gmail.com.<br>
+            Вы получите:
             <ul>
-                <li>Booking confirmation</li>
-                <li>Meeting link</li>
-                <li>Reminder 1 hour before the meeting</li>
+                <li>Подтверждение бронирования</li>
+                <li>Ссылку на встречу</li>
+                <li>Напоминание за 1 час до встречи</li>
             </ul>
             </div>
             """,
@@ -918,14 +1052,17 @@ def main():
 
         with st.form("booking_form"):
             booker_email = st.text_input(
-                "📧 Your email address",
-                help="You will receive booking confirmation and meeting details at this address",
+                "📧 Ваш email адрес",
+                help="На этот адрес вы получите подтверждение бронирования и детали встречи",
                 placeholder="zhenyabratkovski5@gmail.com",
             )
-            submitted = st.form_submit_button("✅ Confirm Booking")
+            submitted = st.form_submit_button("✅ Подтвердить бронирование")
 
             if submitted:
                 if not booker_email:
+                    st.session_state.messages.append(
+                        ("error", "Пожалуйста, введите ваш email адрес")
+                    )
                     st.error("Please enter your email address")
                 else:
                     if create_calendar_event(
@@ -935,6 +1072,12 @@ def main():
                             st.session_state.selected_slot.strftime("%d/%m/%Y %H:%M"),
                             booker_email,
                         ):
+                            st.session_state.messages.append(
+                                (
+                                    "success",
+                                    "🎉 Встреча успешно забронирована! Проверьте вашу почту.",
+                                )
+                            )
                             st.success(
                                 "🎉 Meeting successfully booked! Check your email for details."
                             )
