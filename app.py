@@ -39,64 +39,66 @@ st.markdown(
         border-radius: 50%;
         object-fit: cover;
         margin-bottom: 1rem;
-        border: 2px solid #1e88e5;
+        border: 2px solid #4dabf7;
     }
     .stButton button {
         width: 100%;
         border-radius: 4px;
-        background-color: white;
-        border: 1px solid #e0e0e0;
+        background-color: #2b2b2b;
+        border: 1px solid #3c3f41;
         padding: 6px 2px;
         font-size: 0.85rem;
         transition: all 0.2s ease;
         margin: 1px 0;
-        color: #424242;
+        color: #a9b7c6;
     }
     .stButton button:hover {
-        background-color: #1e88e5;
-        color: white;
-        border-color: #1e88e5;
+        background-color: #4dabf7;
+        color: #2b2b2b;
+        border-color: #4dabf7;
     }
     .date-header {
-        background-color: #1e88e5;
-        color: white;
+        background-color: #323232;
+        color: #a9b7c6;
         padding: 6px 10px;
         border-radius: 4px;
         margin: 8px 0 4px;
         font-size: 0.85rem;
+        border: 1px solid #3c3f41;
     }
     .booking-form {
-        background-color: white;
+        background-color: #2b2b2b;
         padding: 20px;
         border-radius: 6px;
         margin-top: 20px;
-        border: 1px solid #e0e0e0;
+        border: 1px solid #3c3f41;
     }
     h1 {
-        color: #1e88e5;
+        color: #4dabf7;
         text-align: center;
         margin: 0.5rem 0;
         font-size: 1.5rem;
         font-weight: 600;
     }
     .subtitle {
-        color: #757575;
+        color: #a9b7c6;
         text-align: center;
         margin-bottom: 1rem;
         font-size: 1rem;
         font-weight: 400;
     }
     .calendar-container {
-        background-color: white;
+        background-color: #2b2b2b;
         padding: 12px;
         border-radius: 6px;
-        border: 1px solid #e0e0e0;
+        border: 1px solid #3c3f41;
         margin: 0 -1rem;
     }
     .date-header h3 {
         margin: 0;
         font-size: 0.9rem;
         font-weight: 400;
+        color: #a9b7c6;
     }
     .slot-grid {
         display: grid;
@@ -105,7 +107,7 @@ st.markdown(
         padding: 4px 0;
     }
     .stApp {
-        background-color: #f5f5f5;
+        background-color: #1e1f22;
     }
     div[data-testid="stToolbar"] {
         display: none;
@@ -126,14 +128,49 @@ st.markdown(
         display: none;
     }
     .stForm button {
-        background-color: #1e88e5;
-        color: white;
+        background-color: #4dabf7;
+        color: #2b2b2b;
         font-weight: 500;
         padding: 8px 16px;
     }
     .stForm button:hover {
-        background-color: #1976d2;
-        border-color: #1976d2;
+        background-color: #339af0;
+        border-color: #339af0;
+    }
+    /* Darcula theme additional styles */
+    .stTextInput input {
+        background-color: #2b2b2b !important;
+        color: #a9b7c6 !important;
+        border: 1px solid #3c3f41 !important;
+    }
+    .stTextInput input:focus {
+        border-color: #4dabf7 !important;
+        box-shadow: none !important;
+    }
+    div[data-baseweb="base-input"] {
+        background-color: #2b2b2b !important;
+    }
+    .stMarkdown {
+        color: #a9b7c6 !important;
+    }
+    p {
+        color: #a9b7c6 !important;
+    }
+    .stAlert {
+        background-color: #2b2b2b !important;
+        color: #a9b7c6 !important;
+        border: 1px solid #3c3f41 !important;
+    }
+    .stAlert > div {
+        color: #a9b7c6 !important;
+    }
+    /* Fix for streamlit components */
+    button[kind="primary"] {
+        background-color: #4dabf7 !important;
+        color: #2b2b2b !important;
+    }
+    button[kind="primary"]:hover {
+        background-color: #339af0 !important;
     }
 </style>
 """,
@@ -302,7 +339,7 @@ def main():
     st.markdown(
         """
         <div class="profile-container">
-            <img src="static/images/profile.jpg" class="profile-photo" alt="Евгений Братковский">
+            <img src="/app/static/images/profile.jpg" class="profile-photo" alt="Евгений Братковский">
             <h1>СВОБОДНЫЕ СЛОТЫ</h1>
             <div class="subtitle">БРАТКОВСКОГО ЕВГЕНИЯ</div>
         </div>
