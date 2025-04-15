@@ -949,108 +949,72 @@ def get_credentials():
         return None
 
 
-def get_free_slots():
-    """Получение свободных и занятых слотов из календаря"""
-    service = get_calendar_service()
+def get_available_slots(date_obj):
+    """Получает список доступных слотов на указанную дату"""
+    try:
+        service = get_calendar_service()
+        if not service:
+            return []
 
-    # Устанавливаем московский часовой пояс
-    moscow_tz = pytz.timezone("Europe/Moscow")
-    now = datetime.now(moscow_tz)
+        # Получаем начало и конец дня
+        start_time = datetime.combine(date_obj, datetime.min.time())
+        end_time = datetime.combine(date_obj, datetime.max.time())
 
-    # Начинаем с начала следующего дня
-    start_date = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(
-        days=1
-    )
-    end_date = start_date + timedelta(days=14)
-
-    # Получаем занятые слоты
-    events_result = (
-        service.events()
-        .list(
-            calendarId="primary",  # Используем primary вместо CALENDAR_ID
-            timeMin=start_date.isoformat(),
-            timeMax=end_date.isoformat(),
-            singleEvents=True,
-            orderBy="startTime",
+        # Получаем события из календаря
+        events_result = (
+            service.events()
+            .list(
+                calendarId=st.secrets["calendar_id"],
+                timeMin=start_time.isoformat() + "Z",
+                timeMax=end_time.isoformat() + "Z",
+                singleEvents=True,
+                orderBy="startTime",
+            )
+            .execute()
         )
-        .execute()
-    )
+        events = events_result.get("items", [])
 
-    events = events_result.get("items", [])
-    busy_slots = []
+        # Создаем список всех возможных слотов
+        all_slots = []
+        current_time = datetime.combine(date_obj, datetime.min.time())
+        while current_time < end_time:
+            if current_time.hour >= 9 and current_time.hour < 18:  # Рабочие часы
+                all_slots.append(current_time)
+            current_time += timedelta(minutes=30)
 
-    # Преобразуем события в список занятых слотов
-    for event in events:
-        start = datetime.fromisoformat(
-            event["start"].get("dateTime", event["start"].get("date"))
-        ).astimezone(moscow_tz)
-        end = datetime.fromisoformat(
-            event["end"].get("dateTime", event["end"].get("date"))
-        ).astimezone(moscow_tz)
+        # Отмечаем занятые слоты
+        busy_slots = set()
+        for event in events:
+            event_start = datetime.fromisoformat(
+                event["start"]["dateTime"].replace("Z", "+00:00")
+            )
+            event_end = datetime.fromisoformat(
+                event["end"]["dateTime"].replace("Z", "+00:00")
+            )
 
-        # Пропускаем события, где вы не подтвердили участие
-        response_status = next(
-            (
-                attendee["responseStatus"]
-                for attendee in event.get("attendees", [])
-                if attendee.get("self", False)
-            ),
-            event.get("status", "confirmed"),  # Для событий, где вы организатор
-        )
+            current = event_start
+            while current < event_end:
+                busy_slots.add(current)
+                current += timedelta(minutes=30)
 
-        if response_status == "declined":
-            continue
+        # Формируем список доступных слотов
+        available_slots = []
+        for slot in all_slots:
+            if slot not in busy_slots:
+                # Получаем название дня недели на русском
+                weekday = WEEKDAYS[slot.strftime("%A")]
+                available_slots.append(
+                    {
+                        "time": slot,
+                        "formatted": f"{weekday}, {slot.strftime('%d.%m')} {slot.strftime('%H:%M')}",
+                    }
+                )
 
-        # Добавляем все часовые слоты в период события
-        current = start
-        while current < end:
-            busy_slots.append(current)
-            current += timedelta(hours=1)
+        return available_slots
 
-    # Создаем список всех возможных слотов
-    all_slots = []
-    current = start_date
-
-    while current < end_date:
-        # Проверяем только рабочие дни (0 = понедельник, 4 = пятница)
-        if current.weekday() < 5:
-            # Добавляем слоты с 9:00 до 17:00 (последняя встреча в 17:00)
-            day_start = current.replace(hour=9, minute=0)
-            day_end = current.replace(hour=17, minute=0)
-
-            slot_time = day_start
-            while slot_time <= day_end:
-                all_slots.append(slot_time)
-                slot_time += timedelta(hours=1)
-
-        # Переходим к следующему дню
-        current = (current + timedelta(days=1)).replace(hour=0, minute=0)
-
-    # Возвращаем словарь с информацией о статусе каждого слота
-    slots_info = {}
-    for slot in all_slots:
-        slot_end = slot + timedelta(hours=1)
-
-        # Проверяем пересечения с занятыми слотами
-        is_busy = any(
-            (
-                busy <= slot < busy + timedelta(hours=1)
-            )  # Начало слота попадает в занятый период
-            or (
-                busy < slot_end <= busy + timedelta(hours=1)
-            )  # Конец слота попадает в занятый период
-            or (slot <= busy < slot_end)  # Занятый период внутри слота
-            for busy in busy_slots
-        )
-
-        # Добавляем информацию о слоте
-        slots_info[slot] = {
-            "is_busy": is_busy,
-            "time": slot.strftime("%H:%M"),
-            "date": slot.strftime("%Y-%m-%d"),
-        }
-
-    return slots_info
+    except Exception as e:
+        st.error(f"❌ Ошибка при получении слотов: {str(e)}")
+        return []
 
 
 def send_email_notification(slot_time, booker_email):
@@ -1665,7 +1629,7 @@ def main():
 
     # Получение информации о слотах
     try:
-        slots_info = get_free_slots()
+        slots_info = get_available_slots(datetime.now())
     except Exception as e:
         st.error(f"Ошибка при получении слотов: {str(e)}")
         return
@@ -1676,8 +1640,8 @@ def main():
 
     # Группировка слотов по дням
     slots_by_day = {}
-    for slot, info in slots_info.items():
-        day = info["date"]
+    for slot, info in slots_info:
+        day = info["date"].strftime("%Y-%m-%d")
         if day not in slots_by_day:
             slots_by_day[day] = []
         slots_by_day[day].append((slot, info))
@@ -1715,12 +1679,12 @@ def main():
             with cols[i % 6]:
                 if info["is_busy"]:
                     st.markdown(
-                        f'<button class="unavailable" disabled>{info["time"]}</button>',
+                        f'<button class="unavailable" disabled>{info["formatted"]}</button>',
                         unsafe_allow_html=True,
                     )
                 else:
                     if st.button(
-                        info["time"],
+                        info["formatted"],
                         key=f"slot_{slot.isoformat()}",
                         use_container_width=True,
                         type="secondary",
